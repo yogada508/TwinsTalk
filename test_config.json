@@ -1,0 +1,41 @@
+{
+    "client_name": "01.UPDRS_client",
+    "service": "UPDRS_tapping",
+    "input": [
+        {
+            "topic_name": "video_name",
+            "data_type": "str"
+        },
+        {
+            "topic_name": "video_data",
+            "data_type": "bytes"
+        }
+    ],
+    "output": [
+        {
+            "topic_name": "annotation",
+            "data_type": "bytes"
+        }
+    ],
+    "node":[
+        {
+            "calculator": "mediapipe",
+            "input": [
+                {
+                    "topic_name": "video_name",
+                    "data_type": "str"
+                },
+                {
+                    "topic_name": "video_data",
+                    "data_type": "bytes"
+                }
+            ],
+            "output": [
+                {
+                    "topic_name": "annotation",
+                    "data_type": "bytes"
+                }
+            ]
+        }
+    ]
+}

@@ -1,0 +1,87 @@
+{
+    "client_name": "01.UPDRS_client",
+    "service": "UPDRS_tapping",
+    "input": [
+        {
+            "topic_name": "video_name",
+            "data_type": "str"
+        },
+        {
+            "topic_name": "video_data",
+            "data_type": "bytes"
+        }
+    ],
+    "output": [
+        {
+            "topic_name": "action_count",
+            "data_type": "int"
+        },
+        {
+            "topic_name": "frequency",
+            "data_type": "float"
+        },
+        {
+            "topic_name": "annotated_video",
+            "data_type":" bytes"
+        }
+    ],
+    "node":[
+        {
+            "calculator": "mediapipe",
+            "input": [
+                {
+                    "topic_name": "video_name",
+                    "data_type": "str"
+                },
+                {
+                    "topic_name": "video_data",
+                    "data_type": "bytes"
+                }
+            ],
+            "output": [
+                {
+                    "topic_name": "annotation",
+                    "data_type": "bytes"
+                }
+            ]
+        },
+        {
+            "calculator": "calculation",
+            "input": [
+                {
+                    "topic_name": "annotation",
+                    "data_type": "bytes"
+                }
+            ],
+            "output": [
+                {
+                    "topic_name": "action_count",
+                    "data_type": "int"
+                },
+                {
+                    "topic_name": "frequency",
+                    "data_type": "float"
+                }
+            ]
+        },
+        {
+            "calculator": "annotation",
+            "input": [
+                {
+                    "topic_name": "annotation",
+                    "data_type": "bytes"
+                },
+                {
+                    "topic_name": "video_data",
+                    "data_type": "bytes"
+                }
+            ],
+            "output": [
+                {
+                    "topic_name": "annotated_video",
+                    "data_type": "bytes"
+                }
+            ]
+        }
+    ]
+}
