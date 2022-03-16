@@ -1,0 +1,10 @@
+__pycache__
+img
+logs
+others
+protos
+flask
+static
+templates
+utils
+*.db
