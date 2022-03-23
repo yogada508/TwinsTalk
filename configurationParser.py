@@ -1,9 +1,9 @@
 import json
 import socket
 
-SERVER_IP = "140.113.28.158"
+SERVER_IP = "140.113.193.15"
 SERVER_PORT = "55555"
-AGENT_IP = "127.0.0.1"
+AGENT_IP = "140.113.193.15"
 
 class ConfigurationParser():
     def __init__(self, config):
@@ -27,10 +27,13 @@ class ConfigurationParser():
         client_name = self.config["client_name"]
         pub_node_id = f"pub/agent/{client_name}"
         sub_node_id = f"sub/agent/{client_name}"
+        pub_to_client_node_id = f"pub/agent/to_client/{client_name}"
+        client_pub_node_id = f"pub/client/{client_name}"
         client_sub_node_id = f"sub/client/{client_name}"
 
         idf = {}
         odf = {}
+        odf_to_client = {}
         connections = []
 
         odf_pattern = "{}_O"  # f"{topic_name}_O"
@@ -38,14 +41,14 @@ class ConfigurationParser():
 
         for node in self.config["node"]:
 
-            # publisher ODF
+            # agent/pub ODF
             for inp in node["input"]:
                 odf_name = odf_pattern.format(inp['topic_name'])
                 idf_name = idf_pattern.format(inp['topic_name'])
                 if odf_name not in odf: odf[odf_name] = inp["data_type"]
                 if idf_name not in idf: idf[idf_name] = inp["data_type"]
 
-                # connection
+                # connection for agent -> server
                 server_node_id = f"sub/server/{node['calculator']}"
                 connections.append({
                     "pub_node_id": pub_node_id,
@@ -55,26 +58,41 @@ class ConfigurationParser():
                     "topic_type": inp["data_type"]
                 })
                 
-            # subscriber IDF
+            # agent/sub IDF
             for out in node["output"]:
                 odf_name = odf_pattern.format(out['topic_name'])
                 idf_name = idf_pattern.format(out['topic_name'])
-                if odf_name not in odf: odf[odf_name] = out["data_type"]
+                if odf_name not in odf: 
+                    if out["topic_name"] in [o["topic_name"] for o in self.config["output"]]:
+                        odf_to_client[odf_name] = out["data_type"]
+                    else:
+                        odf[odf_name] = out["data_type"]
                 if idf_name not in idf: idf[idf_name] = out["data_type"]
+
+        # connection for client -> agent
+        for inp in self.config["input"]:
+            idf_name = idf_pattern.format(inp["topic_name"])
+            connections.append({
+                "pub_node_id": client_pub_node_id,
+                "pub_topic_name": f"{client_pub_node_id}:{inp['topic_name']}",
+                "sub_node_id": sub_node_id,
+                "sub_topic_name": f"{sub_node_id}:{idf_name}",
+                "topic_type": inp["data_type"]
+            })
         
-        # connection
+        # connection for agent -> client
         for out in self.config["output"]:
             odf_name = odf_pattern.format(out['topic_name'])
             connections.append({
-                "pub_node_id": pub_node_id,
-                "pub_topic_name": f"{pub_node_id}:{odf_name}",
+                "pub_node_id": pub_to_client_node_id,
+                "pub_topic_name": f"{pub_to_client_node_id}:{odf_name}",
                 "sub_node_id": client_sub_node_id,
                 "sub_topic_name": f"{client_sub_node_id}:{out['topic_name']}",
                 "topic_type": out["data_type"]
             })
 
-        # pub
-        pub_config = {
+        # publiser (to server)
+        pub_to_server_config = {
             "node_config": {
                 "server_ip": SERVER_IP,
                 "server_port": SERVER_PORT,
@@ -83,14 +101,31 @@ class ConfigurationParser():
                 "node_domain": "domain1"
             },
             "topic_config": {
-                "mode": 0,
+                "mode": 1,
                 "ip": AGENT_IP,
                 "port": self._get_free_port(),
                 "topic_info": odf 
             }
         }
 
-        # sub
+        # publisher (to client)
+        pub_to_client_config = {
+            "node_config": {
+                "server_ip": SERVER_IP,
+                "server_port": SERVER_PORT,
+                "node_id": pub_to_client_node_id,
+                "node_name": pub_to_client_node_id,
+                "node_domain": "domain1"
+            },
+            "topic_config": {
+                "mode": 0,
+                "ip": AGENT_IP,
+                "port": self._get_free_port(),
+                "topic_info": odf_to_client
+            }
+        }
+
+        # subscriber
         sub_config = {
             "node_config": {
                 "server_ip": SERVER_IP,
@@ -108,7 +143,8 @@ class ConfigurationParser():
         }
 
         self.parse_result =  {
-            "pub_config": pub_config,
+            "pub_to_server_config": pub_to_server_config,
+            "pub_to_client_config": pub_to_client_config,
             "sub_config": sub_config,
             "connections": connections
         }

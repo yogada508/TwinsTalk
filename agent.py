@@ -10,35 +10,48 @@ import threading
 
 class Agent():
     def __init__(self, config):
-        self.pub_config = config["pub_config"]
+        self.pub_to_server_config = config["pub_to_server_config"]
+        self.pub_to_client_config = config["pub_to_client_config"]
         self.sub_config = config["sub_config"]
         self.connections = config["connections"]
-        self.pub_sub_table = {}
+        self.pub_sub_table = {} 
 
         self.init_table()
     
+    # odf and idf route table
     def init_table(self):
-        for pub_topic in self.pub_config["topic_config"]["topic_info"]:
+        for pub_topic in self.pub_to_server_config["topic_config"]["topic_info"]:
             sub_topic = pub_topic[:-1] + "I"
             self.pub_sub_table[pub_topic] = sub_topic
 
-    def start_pub(self):
-        node_config, topic_config = self.pub_config["node_config"], self.pub_config["topic_config"]
+    # start pub node (to server)
+    def start_publisher_to_server(self):
+        node_config, topic_config = self.pub_to_server_config["node_config"], self.pub_to_server_config["topic_config"]
         node = node_api.Node(node_config)
         pub = Publisher.Publisher(node, topic_config)
         
-        self.pub = pub
+        self.pub_to_server = pub
+
+    # start pub node (to client)
+    def start_publisher_to_client(self):
+        node_config, topic_config = self.pub_to_client_config["node_config"], self.pub_to_client_config["topic_config"]
+        node = node_api.Node(node_config)
+        pub = Publisher.Publisher(node, topic_config)
+        
+        self.pub_to_client = pub
     
-    def start_sub(self):
+    # start sub node
+    def start_subscriber(self):
         node_config, topic_config = self.sub_config["node_config"], self.sub_config["topic_config"]
         node = node_api.Node(node_config)
         sub = Subscriber.Subscriber(node, topic_config)
 
         self.sub = sub
 
+    # create connection (client -> agent, agent -> server, agent -> client)
     def set_connection(self):
-        server_ip = (self.pub_config)["node_config"]["server_ip"]
-        server_port = (self.pub_config)["node_config"]["server_port"]
+        server_ip = (self.pub_to_server_config)["node_config"]["server_ip"]
+        server_port = (self.pub_to_server_config)["node_config"]["server_port"]
         server_address = f"{server_ip}:{server_port}"
 
         connection_ids = []
@@ -60,29 +73,35 @@ class Agent():
                 if connection_id != -1:
                     connection_ids.append(connection_id)
                 else:
-                    print("add connection fail::", conn)
-                print("add connection", i)
+                    print("add connection fail:", conn)
+                # print("add connection", i)
                 i+=1
-                time.sleep(3)
+                time.sleep(2)
 
         print(connection_ids)
     
     def start(self):
         
-        self.start_pub()
-        self.start_sub()
-        time.sleep(5)
+        self.start_publisher_to_server()
+        time.sleep(3)
+
+        self.start_publisher_to_client()
+        time.sleep(3)
+
+        self.start_subscriber()
+        time.sleep(3)
+
         print("Starting add connection!")
         self.set_connection()
 
         # read and write data
         try:
             while True:
-                # self.sub.updata_data()
-                # for pub_topic, sub_topic in self.pub_sub_table.items():
-                #     proto_data = sub.read_topic(sub_topic)
-                #     if proto_data is not None:
-                #         self.pub.data_writer(pub_topic, proto_data.data)
+                self.sub.updata_data()
+                for pub_topic, sub_topic in self.pub_sub_table.items():
+                    proto_data = self.sub.read_topic(sub_topic)
+                    if proto_data is not None:
+                        self.pub_to_server.data_writer(pub_topic, proto_data.data)
                         
                 time.sleep(1)
         

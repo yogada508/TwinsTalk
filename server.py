@@ -20,7 +20,7 @@ def subscribe():
     } 
 
     sub_topic_config = {
-        'mode':1, # 0:server mode 1:client mode
+        'mode':0, # 0:server mode 1:client mode
         'topic_info':subscription,
         'ip': '140.113.28.159',
         'port': 12345

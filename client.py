@@ -31,11 +31,11 @@ def main():
     i = 0
 
     while True:
-        print("send time: ", time.time())  
+        print(f'data:{str(i)}, send time: {time.time()}')  
         pub.data_writer("video_name", str(i))
         i+=1
 
-        time.sleep(3)
+        time.sleep(2)
         
 
 if __name__ == "__main__":
