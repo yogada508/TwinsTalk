@@ -8,3 +8,6 @@ static
 templates
 utils
 *.db
+client_video
+UPDRS
+*.mp4
