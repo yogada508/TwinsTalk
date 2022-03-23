@@ -14,7 +14,7 @@ import numpy as np
 import time
 SmallDataSize=8000 #8KB
 SmallBuffSize=20
-LargeDataSize= 9000000 #9MB RGB array 
+LargeDataSize= 10 * 1024 * 1024 # 10MB max data size
 LargeBuffSize=10
 
 ProtobufDataDict={}
@@ -184,7 +184,8 @@ class GRPC_ServerProcess(object):
             
         
     def run(self,topics_buffer):
-        server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
+        options = [('grpc.max_send_message_length', LargeDataSize), ('grpc.max_receive_message_length', LargeDataSize)]
+        server = grpc.server(futures.ThreadPoolExecutor(max_workers=10), options=options)
         servicer=PubSubServiceServicer(self.node,topics_buffer)
         pubsub_pb2_grpc.add_PubSubServiceServicer_to_server(servicer, server)
         server.add_insecure_port('[::]:{}'.format(self.port))

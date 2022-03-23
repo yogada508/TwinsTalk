@@ -28,7 +28,7 @@ MAX_MESSAGE_LENGTH = 100000000
 _PROCESS_COUNT=3
 SmallDataSize=8000 #8KB
 SmallBuffSize=20
-LargeDataSize= 4000000 #4MB 
+LargeDataSize= 10*1024*1024 #10MB 
 LargeBuffSize=5
 
 
@@ -65,13 +65,13 @@ def pull_request(stub,message,topic_type):
     if topic_type == 'str':
         responses = stub.GetStringData(iter(message))
     elif topic_type == 'bytes':
-        responses = stub.GetBytesData(iter(message), timeout=5)
+        responses = stub.GetBytesData(iter(message))
     elif topic_type == 'int':
-        responses = stub.GetIntData(iter(message), timeout=5)
+        responses = stub.GetIntData(iter(message))
     elif topic_type == 'float':
-        responses = stub.GetFloatData(iter(message), timeout=5)
+        responses = stub.GetFloatData(iter(message))
     elif topic_type == 'bool':
-        responses = stub.GetBoolData(iter(message), timeout=5)
+        responses = stub.GetBoolData(iter(message))
     
     return responses
 
@@ -80,13 +80,13 @@ def push_request(stub,message,topic_type):
     if topic_type == 'str':
         responses = stub.PostStringData(iter(message))
     elif topic_type == 'bytes':
-        responses = stub.PostBytesData(iter(message), timeout=5)
+        responses = stub.PostBytesData(iter(message))
     elif topic_type == 'int':
-        responses = stub.PostIntData(iter(message), timeout=5)
+        responses = stub.PostIntData(iter(message))
     elif topic_type == 'float':
-        responses = stub.PostFloatData(iter(message), timeout=5)
+        responses = stub.PostFloatData(iter(message))
     elif topic_type == 'bool':
-        responses = stub.PostBoolData(iter(message), timeout=5)
+        responses = stub.PostBoolData(iter(message))
     return responses
 
 def createBytes(size):
