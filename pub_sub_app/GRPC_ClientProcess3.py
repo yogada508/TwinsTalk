@@ -1,6 +1,8 @@
 #============================================================
 # import packages
 #============================================================
+from pyexpat.errors import messages
+from socket import timeout
 import time
 import base64
 import sys
@@ -8,6 +10,7 @@ import logging
 import threading
 import multiprocessing
 import collections
+import os
 
 #============================================================
 # import grpc protobuf
@@ -53,36 +56,37 @@ def request_th(args):
                     continue                    
                 print("rec delay time:",len(res.data),res.node_id,res.topic_name,res.topic_name,time.time()-res.timestamp/MICRO)
                 res_list.append((info,res))
+            # print(f'time:{time.time()} ,pid:{os.getpid()}, res"{res_list}')
             return res_list
     except Exception as e:
-        # print("request_th",e) 
+        print("request_th",e) 
         return []
 def pull_request(stub,message,topic_type):
     if topic_type == 'str':
-        responses = stub.GetStringData(iter(message),timeout=1)
+        responses = stub.GetStringData(iter(message))
     elif topic_type == 'bytes':
-        responses = stub.GetBytesData(iter(message),timeout=1)
+        responses = stub.GetBytesData(iter(message), timeout=5)
     elif topic_type == 'int':
-        responses = stub.GetIntData(iter(message),timeout=1)
+        responses = stub.GetIntData(iter(message), timeout=5)
     elif topic_type == 'float':
-        responses = stub.GetFloatData(iter(message),timeout=1)
+        responses = stub.GetFloatData(iter(message), timeout=5)
     elif topic_type == 'bool':
-        responses = stub.GetBoolData(iter(message),timeout=1)
+        responses = stub.GetBoolData(iter(message), timeout=5)
     
     return responses
 
 def push_request(stub,message,topic_type):
     #print("message",len(message),message)
     if topic_type == 'str':
-        responses = stub.PostStringData(iter(message),timeout=1)
+        responses = stub.PostStringData(iter(message))
     elif topic_type == 'bytes':
-        responses = stub.PostBytesData(iter(message),timeout=1)
+        responses = stub.PostBytesData(iter(message), timeout=5)
     elif topic_type == 'int':
-        responses = stub.PostIntData(iter(message),timeout=1)
+        responses = stub.PostIntData(iter(message), timeout=5)
     elif topic_type == 'float':
-        responses = stub.PostFloatData(iter(message),timeout=1)
+        responses = stub.PostFloatData(iter(message), timeout=5)
     elif topic_type == 'bool':
-        responses = stub.PostBoolData(iter(message),timeout=1)
+        responses = stub.PostBoolData(iter(message), timeout=5)
     return responses
 
 def createBytes(size):
@@ -291,13 +295,59 @@ class GRPC_ClientProcess3:
 
                 connection_list.append((addr,conn,messages))
         return connection_list
+
+    def connect_rpcServer(self, connection_info):
+        connection_set = set()
+        stub_set = set(self.stub.keys())
+
+        for connection in connection_info:
+            addr, messages = connection[0], connection[2]
+            # add target topic_name to connection_set
+            for message in messages:
+                connection_set.add(message.topic_name)
+
+        # remove deleted topic_name in stub list
+        for target_topic in stub_set - connection_set:
+            del target_topic
+
+        # add new topic_name to stub list
+        for target_topic in connection_set - stub_set:
+            channel = grpc.insecure_channel(addr)
+            stub = pubsub_pb2_grpc.PubSubServiceStub(channel)
+            self.stub[target_topic] = stub
+
+    def request(self, args):
+        try:
+            info, message = args[1], args[2]
+
+            for i in message:
+                stub = self.stub[i.topic_name]
+            
+            if info["client_mode"]==1:
+                responses=pull_request(stub,message,info["topic_type"])
+            else:
+                responses=push_request(stub,message,info["topic_type"])
+            
+            res_list=[]
+            for res in responses:
+                if not res.data:
+                    continue                    
+                print("rec delay time:",len(res.data),res.node_id,res.topic_name,res.topic_name,time.time()-res.timestamp/MICRO)
+                res_list.append((info,res))
+            # print(f'time:{time.time()} ,pid:{os.getpid()}, res"{res_list}')
+            return res_list
+
+        except Exception as e:
+            print("request_th",e) 
+            return []
+
     def run(self):
         # calculate time
         average_time = 0
         # calculate fps
         self.prev_timestamp = 0
         print("start GRPC client Process")
-        worker_pool=multiprocessing.Pool(processes=_PROCESS_COUNT)
+
         self.start_time = time.time()
         count = 0
         try:
@@ -307,15 +357,21 @@ class GRPC_ClientProcess3:
                         connection_info=self.pull_receiver()
                     else:
                         connection_info=self.push_sender()
-                    responses=[]
-                    worker_res=worker_pool.map_async(request_th,connection_info)
-                    for res in worker_res.get(1):
-                        responses+=res
-                    if self.client_mode==1:
-                        for info,res in responses:
-                            print("delay time:",len(res.data),res.node_id,res.topic_name,res.topic_name,time.time()-res.timestamp/MICRO)
-                            self.write_data(res,info['sub_name'],info["topic_type"])
+                
+                    if connection_info:
+                        self.connect_rpcServer(connection_info)
+
+                    for connection in connection_info:
+                        response = self.request(connection)
+                        if response:
+                            #print(response)
+                            if self.client_mode==1:
+                                for info,res in response:
+                                    print("delay time:",len(res.data),res.node_id,res.topic_name,res.topic_name,time.time()-res.timestamp/MICRO)
+                                    self.write_data(res,info['sub_name'],info["topic_type"])
+
                 except Exception as e:
+                    print("clientProcess run: ",e)
                     count += 1
                     cur_time = time.time()
 
@@ -329,7 +385,4 @@ class GRPC_ClientProcess3:
             
         finally:
             print("terminating worker_pool")
-            worker_pool.terminate()
-            worker_pool.close()
-            worker_pool.join()
             print("worker_pool terminated")
