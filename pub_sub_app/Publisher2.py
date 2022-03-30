@@ -1,6 +1,7 @@
 # ============================================================
 # import packages
 # ============================================================
+from flask import signals_available
 from PubSubServiceServicer import PubSubServiceServicer
 import time
 import base64
@@ -100,6 +101,7 @@ class Publisher():
 
         # shared memory for add or delete topic
         self.topic_action_queue = multiprocessing.Queue()
+        self.topic_status = multiprocessing.Manager().dict()
 
         self.serverProcess = None
 
@@ -149,6 +151,7 @@ class Publisher():
             print("Add topic in publisher mode'0' not support currently!")
             return
 
+        topic_name = self.node.node_id + ":" + topic_name
         action = {
             "action": "add_topic",
             "topic_type": topic_type,
@@ -157,14 +160,22 @@ class Publisher():
         self.topic_action_queue.put(action)
         self._add_topic_to_buffer(topic_name, topic_type)
 
+        while True:
+            if topic_name in self.topic_status.keys():
+                print("add topic success")
+                break
+
     def delete_topic(self, topic_name, topic_type):
-        self._delete_topic_from_buffer(topic_name)
+
+        topic_name = self.node.node_id + ":" + topic_name
         action = {
             "action": "delete_topic",
             "topic_name": topic_name,
             "topic_type": topic_type
         }
         self.topic_action_queue.put(action)
+        self._delete_topic_from_buffer(topic_name)
+        del self.topic_status[topic_name]
 
     def _add_topic_to_buffer(self, topic_name, topic_type):
         self.publishment[topic_name] = topic_type
@@ -210,6 +221,7 @@ class Publisher():
                                            node_domain=self.node.node_domain)
                 topic.connected_nodes.extend(self.connected_topic[topic_name])
                 responses = server_stub.AddTopic(topic)
+                self.topic_status[topic_name] = True
         except Exception as e:
             print("publish_topic", e)
 
