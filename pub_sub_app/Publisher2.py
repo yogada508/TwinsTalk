@@ -103,6 +103,13 @@ class Publisher():
         self.topic_action_queue = multiprocessing.Queue()
         self.topic_status = multiprocessing.Manager().dict()
 
+        # shared memory for connection info
+        self.sm = multiprocessing.Manager()
+        self.connection_info = self.sm.list()
+        for i in range(2):
+            self.connection_info.append(self.sm.dict())
+        self.info_pt = self.sm.Value('i', 0)
+
         self.serverProcess = None
 
         if self.topic_mode == 0:
@@ -242,6 +249,23 @@ class Publisher():
 # CONNECTION OPERATION
 ##################################################
 
+    def has_connection(self, pub_topic_name, sub_topic_name):
+        connection_info = self.connection_info[self.info_pt.value]
+        if pub_topic_name in connection_info:
+            if sub_topic_name in [conn["topic_name"] for conn in connection_info[pub_topic_name]]:
+                return True
+
+        return False
+
+    def set_connection(self, connections):
+        pt = self.info_pt.value+1
+        if(pt >= 2):
+            pt = 0
+        self.connection_info[pt].clear()
+        for conn in connections:
+            self.connection_info[pt][conn] = connections[conn].copy()
+        self.info_pt.value = pt
+
     def add_connection(self, **args):
 
         ConnectionInfo = node_pb2.ConnectionInfo(
@@ -252,17 +276,19 @@ class Publisher():
             topic_type=args["topic_type"]
         )
 
-        with grpc.insecure_channel('{}:{}'.format(self.node.server_ip, self.node.server_port)) as channel:
-            server_stub = node_pb2_grpc.ControlStub(channel)
-            response = server_stub.AddConnection(ConnectionInfo)
+        try:
+            with grpc.insecure_channel('{}:{}'.format(self.node.server_ip, self.node.server_port)) as channel:
+                server_stub = node_pb2_grpc.ControlStub(channel)
+                response = server_stub.AddConnection(ConnectionInfo)
 
-            connection_id = int(response.connection_id)
-            print(f"ConnectionID = {connection_id} Added.")
+                connection_id = response.connection_id
+                print(f"added ConnectionID = {connection_id}.")
 
-            if connection_id != -1:
-                return connection_id[0]
-            else:
-                return None
+                return connection_id
+
+        except grpc.RpcError as e:
+            print(e.details())
+            return "-1"
 
     def delete_connection(self, connection_id):
         ConnectionID = node_pb2.ConnectionID(connection_id=connection_id)
@@ -307,6 +333,8 @@ class Publisher():
             # print("get_connection",self.pub_push_connection)
 
             self.clientProcess.set_connection(self.pub_push_connection)
+            self.set_connection(self.pub_push_connection)
+
         except Exception as e:
             raise e
             print('Publisher (get_connection) Exception: {}'.format(e))
