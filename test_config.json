@@ -14,7 +14,7 @@
     "output": [
         {
             "topic_name": "annotation",
-            "data_type": "bytes"
+            "data_type": "str"
         }
     ],
     "node":[
@@ -33,7 +33,7 @@
             "output": [
                 {
                     "topic_name": "annotation",
-                    "data_type": "bytes"
+                    "data_type": "str"
                 }
             ]
         }

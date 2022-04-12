@@ -5,6 +5,7 @@ from configuration_parser.agent_parser import Agent_Parser as Parser
 import grpc
 import json
 import threading
+from multiprocessing import Process
 import agent
 import time
 
@@ -48,7 +49,7 @@ def run_agent(config):
 
 def main():
     sub = start_config_sub()
-    agent_threads = []
+    agent_process = []
 
     try:
         while True:
@@ -60,10 +61,10 @@ def main():
 
                     config = json.loads(config_data.data)
                     parse_result = Parser(config).get_parse_result()
-                    thread = threading.Thread(
+                    process = Process(
                         target=run_agent, args=(parse_result,))
-                    agent_threads.append(thread)
-                    thread.start()
+                    agent_process.append(process)
+                    process.start()
                 time.sleep(0.5)
 
             except Exception as e:
@@ -73,7 +74,7 @@ def main():
         print(e)
 
     finally:
-        for t in agent_threads:
+        for t in agent_process:
             t.join()
 
 

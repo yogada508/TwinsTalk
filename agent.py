@@ -28,7 +28,7 @@ class Agent():
 
         for pub_topic in self.pub_to_client_config["topic_config"]["topic_info"]:
             sub_topic = pub_topic[:-1] + "I"
-            self.pub_to_server_table[pub_topic] = sub_topic
+            self.pub_to_client_table[pub_topic] = sub_topic
 
     # start pub node (to server)
     def start_publisher_to_server(self):
@@ -124,5 +124,6 @@ class Agent():
             print("[Error]: agent:", e)
 
         finally:
-            self.pub.terminate()
+            self.pub_to_client.terminate()
+            self.pub_to_server.terminate()
             self.sub.terminate()

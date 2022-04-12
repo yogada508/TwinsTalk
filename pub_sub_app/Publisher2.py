@@ -358,7 +358,7 @@ class Publisher():
             self.clientProcess.write_data(proto_data, topic_name, data_type)
         #self.topics_buffer[topic_name].append([topic_data, self.get_sync_time()])
 
-    def _terminate(self):
+    def terminate(self):
         try:
             print("terminating publisher")
             if self.serverProcess is not None:
@@ -395,4 +395,4 @@ class Publisher():
         print("Publisher terminated")
 
     def __del__(self):
-        self._terminate()
+        self.terminate()
