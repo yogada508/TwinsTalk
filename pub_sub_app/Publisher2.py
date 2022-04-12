@@ -363,6 +363,8 @@ class Publisher():
             print("terminating publisher")
             if self.serverProcess is not None:
                 self.serverProcess.terminate()
+            if self.clientProcess is not None:
+                self.clientProcess.terminate()
             self.stop_flag.set()
             self.thread.join()
         except Exception as e:
