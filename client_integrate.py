@@ -28,12 +28,8 @@ def main():
             print("receive time: ", time.time())
             break
 
-    # while True:
-    #     print(f'(str)data:{str(i)}, send time: {time.time()}')
-    #     tt_client.pub.data_writer("video_name", str(i))
-
-    #     i += 1
-    #     time.sleep(2)
+    tt_client.sub.terminate()
+    tt_client.pub.terminate()
 
 
 if __name__ == '__main__':

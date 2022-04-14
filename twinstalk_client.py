@@ -46,6 +46,8 @@ class TwinsTalk_Client:
                 return
 
     def _wait_agent_environment_setting(self):
+        print("Waiting agent environment setting......")
+
         topic_dict = self.pub_config["topic_config"]["topic_info"]
         pub_node_id = self.pub_node_id
         sub_node_id = f"sub/agent/{self.configuration['client_name']}"

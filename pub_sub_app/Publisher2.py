@@ -282,9 +282,18 @@ class Publisher():
                 response = server_stub.AddConnection(ConnectionInfo)
 
                 connection_id = response.connection_id
-                print(f"added ConnectionID = {connection_id}.")
 
-                return connection_id
+                if connection_id != "-1":
+                    while True:
+                        if self.has_connection(args["pub_topic_name"], args["sub_topic_name"]):
+                            break
+
+                    print(f"added ConnectionID = {connection_id}.")
+                else:
+                    print(
+                        f"[Failed] Add Connection: {args['pub_topic_name']} and {args['sub_topic_name']}")
+
+            return connection_id
 
         except grpc.RpcError as e:
             print(e.details())
