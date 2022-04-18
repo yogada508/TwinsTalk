@@ -5,7 +5,6 @@ others
 flask
 static
 templates
-utils
 *.db
 client_video
 UPDRS

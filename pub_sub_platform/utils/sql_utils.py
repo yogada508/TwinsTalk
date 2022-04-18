@@ -274,7 +274,15 @@ class DataBase():
         except Exception as e:
             pass
 
+    def delete_topic_by_nodeID(self, node_id):
 
+        sql = 'DELETE FROM Topic WHERE NodeID="{}";'.format(node_id)
+
+        try:
+            self.execute_with_commit(sql)
+            print("DELETE Topic {} successfully".format(node_id))
+        except Exception as e:
+            pass
     
     def delete_connection_by_topic(self, topic_name, topic_type):
         sql = 'DELETE FROM Connection WHERE PubTopicName="{}" AND TopicType="{}";'.format(topic_name, topic_type)
@@ -398,6 +406,16 @@ class DataBase():
         except Exception as e:
             pass
 
+    def delete_subscribe_by_nodeID(self, node_id):
+
+        sql = 'DELETE FROM SubscribeTopic WHERE NodeID="{}";'.format(node_id)
+        
+        try:
+            self.execute_with_commit(sql)
+            print("DELETE SubscribeTopic {} successfully".format(node_id))
+        except Exception as e:
+            pass
+
     def delete_subscribe_topic(self, topic_name, topic_type):
         sql = 'DELETE FROM SubscribeTopic WHERE TopicName="{}" AND TopicType="{}";'.format(topic_name, topic_type)
 
@@ -479,6 +497,26 @@ class DataBase():
         try:
             self.execute_with_commit(sql)
             print("DELETE Connection {} successfully".format(connect_id))
+        except Exception as e:
+            pass
+
+    def delete_connection_by_pubID(self, pub_node_id):
+
+        sql = 'DELETE FROM Connection WHERE PubNodeID="{}";'.format(pub_node_id)
+        
+        try:
+            self.execute_with_commit(sql)
+            print("DELETE Connection {} successfully".format(pub_node_id))
+        except Exception as e:
+            pass
+
+    def delete_connection_by_subID(self, sub_node_id):
+
+        sql = 'DELETE FROM Connection WHERE PubNodeID="{}";'.format(sub_node_id)
+        
+        try:
+            self.execute_with_commit(sql)
+            print("DELETE Connection {} successfully".format(sub_node_id))
         except Exception as e:
             pass
 

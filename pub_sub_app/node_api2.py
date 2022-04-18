@@ -62,7 +62,6 @@ class Node():
 
         # store ntp time offset
         self.delay = 0.0
-        self.connect_to_server()
         self.register()
 
     def get_node_id(self):
@@ -93,9 +92,11 @@ class Node():
             print(e)
 
     def deregister(self):
-        node = node_pb2.Node(node_id=self.node_id)
         try:
-            responses = self.server_stub.Deregister(node)
+            with grpc.insecure_channel('{}:{}'.format(self.server_ip, self.server_port)) as channel:
+                server_stub = node_pb2_grpc.ControlStub(channel)
+                node = node_pb2.Node(node_id=self.node_id)
+                responses = server_stub.Deregister(node)
         except Exception as e:
             print(e)
 

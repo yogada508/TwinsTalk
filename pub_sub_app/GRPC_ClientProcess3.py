@@ -377,6 +377,7 @@ class GRPC_ClientProcess3:
                                         res, info['sub_name'], info["topic_type"])
 
                 except Exception as e:
+                    raise e
                     print("clientProcess run: ", e)
                     count += 1
                     cur_time = time.time()

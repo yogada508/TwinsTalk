@@ -243,6 +243,7 @@ class Subscriber():
                 self.clientProcess.terminate()
             self.stop_flag.set()
             self.thread.join()
+            self.node.deregister()
         except Exception as e:
             print("terminate Subscriber fail:", e)
 

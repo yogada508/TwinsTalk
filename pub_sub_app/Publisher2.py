@@ -111,6 +111,7 @@ class Publisher():
         self.info_pt = self.sm.Value('i', 0)
 
         self.serverProcess = None
+        self.clientProcess = None
 
         if self.topic_mode == 0:
             self.serverProcess = GRPC_ServerProcess(
@@ -376,6 +377,7 @@ class Publisher():
                 self.clientProcess.terminate()
             self.stop_flag.set()
             self.thread.join()
+            self.node.deregister()
         except Exception as e:
             print("terminate publisher failed", e)
 
