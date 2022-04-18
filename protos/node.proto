@@ -1,0 +1,135 @@
+ syntax = "proto3";
+
+package node;
+
+service Control {
+    rpc Register(NodeInfo) returns (Empty) {}
+    rpc Deregister(Node) returns (Empty) {}
+    rpc UpdateStatus(NodeStatus) returns (Empty) {}
+    rpc CheckNodeStatus(Node) returns (NodeAlive) {}
+
+    rpc AddTopic(TopicInfo) returns (Empty) {}
+    rpc DeleteTopic(Topic) returns (Empty) {}
+    rpc UpdateTopicStatus(TopicStatus) returns (Empty) {}
+
+    rpc AddSubscribeTopic(SubscribeTopic) returns (Empty) {}
+    rpc UpdateSubscribeTopicStatus(SubscribeTopicStatus) returns (Empty) {}
+    rpc DeleteSubscribeTopic(SubscribeTopicInfo) returns (Empty) {}
+
+    rpc GetConnection(RequestConnection) returns (ResponseConnection) {}
+    rpc DeleteConnection(ConnectionID) returns (Empty) {}
+    rpc AddConnection(ConnectionInfo) returns (ConnectionID){}
+}
+
+message Empty {}
+
+// for deregister
+message Node {
+    string node_id = 1; // unique, mac address
+}
+
+// for register
+message NodeInfo {
+    string node_id = 1; // unique, mac address
+    string node_name = 2;
+    string node_domain = 3;
+    int64  update_time = 4;
+}
+
+// for update status
+message NodeStatus {
+    string node_id = 1;
+    int64 update_time = 2;
+}
+
+// for check node status
+message NodeAlive{
+    bool isAlive = 1;
+}
+
+
+message RequestConnection {
+    string node_id = 1;
+    bool isSubscriber=2;
+}
+
+message ResponseConnection {
+    repeated ResponseTopicInfo topics_info = 1;
+}
+
+message ResponseTopicInfo {
+    string pub_topic_name = 1;
+    string sub_topic_name = 2;
+    string pub_node_id = 3;
+    string sub_node_id = 4;
+    string topic_type = 5;
+    int64  mode =   6;
+    string ip = 7;
+    int64  port = 8;
+    bool isOnline = 9;
+}
+
+// for delete topic
+message Topic {
+    string topic_name = 1;
+    string topic_type = 2;
+    string node_id = 3;
+}
+
+// for add topic
+message TopicInfo {
+    string topic_name = 1;
+    string topic_type = 2;
+    string node_id = 3;
+    string node_domain = 4;
+    int64  update_time = 5;
+    int64 mode = 6;
+    string ip = 7;
+    int64  port = 8;
+    repeated string connected_nodes = 9;
+}
+
+// for update topic status
+message TopicStatus {
+    string topic_name = 1;
+    string node_id = 2;
+    repeated string connected_nodes = 3;
+    int64  update_time = 4;
+}
+
+// for add subscribe topic
+message SubscribeTopic {
+    string topic_name = 1;
+    string topic_type = 2;
+    string node_id = 3;
+    string node_domain = 4;
+    int64  update_time = 5;
+    int64 mode = 6;
+    string ip = 7;
+    int64  port = 8;
+    repeated string connected_nodes = 9;
+}
+
+// for delete subscribe topic
+message SubscribeTopicInfo {
+    string topic_name = 1;
+    string topic_type = 2;
+}
+
+message SubscribeTopicStatus {
+    string topic_name = 1;
+    string node_id = 2;
+    int64  update_time = 3;
+}
+
+message ConnectionInfo {
+    string sub_topic_name = 1;
+    string pub_topic_name = 2;
+    string topic_type = 3;
+    string pub_node_id = 4;
+    string sub_node_id = 5;
+}
+
+message ConnectionID {
+    string connection_id = 1;
+}

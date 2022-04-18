@@ -77,6 +77,9 @@ def main():
         for t in agent_process:
             t.join()
 
+        # deregister the sub node
+        sub.node.deregister()
+
 
 if __name__ == '__main__':
     main()

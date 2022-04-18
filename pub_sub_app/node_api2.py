@@ -56,12 +56,13 @@ class Node():
         self.node_name = node_config['node_name']
         self.node_domain = node_config['node_domain']
         self.update_timing = update_timing
-  
+
         # store subscriber class and process
         self.subscriber = {}
 
         # store ntp time offset
         self.delay = 0.0
+        self.connect_to_server()
         self.register()
 
     def get_node_id(self):
@@ -73,58 +74,60 @@ class Node():
 
     def connect_to_server(self):
 
-        self.channel = grpc.insecure_channel('{}:{}'.format(self.server_ip, self.server_port))
-        self.intercept_channel = grpc.intercept_channel(self.channel, interceptor.NodeInterceptor())
+        self.channel = grpc.insecure_channel(
+            '{}:{}'.format(self.server_ip, self.server_port))
+        self.intercept_channel = grpc.intercept_channel(
+            self.channel, interceptor.NodeInterceptor())
         self.server_stub = node_pb2_grpc.ControlStub(self.intercept_channel)
         self.ntp_stub = ntp_pb2_grpc.NtpStub(self.channel)
 
     def register(self):
         try:
             with grpc.insecure_channel('{}:{}'.format(self.server_ip, self.server_port)) as channel:
-                    server_stub = node_pb2_grpc.ControlStub(channel)
-                    node_info = node_pb2.NodeInfo(node_id=self.node_id, 
-                                            node_name=self.node_name, 
-                                            node_domain=self.node_domain)
-                    responses = server_stub.Register(node_info)        
+                server_stub = node_pb2_grpc.ControlStub(channel)
+                node_info = node_pb2.NodeInfo(node_id=self.node_id,
+                                              node_name=self.node_name,
+                                              node_domain=self.node_domain)
+                responses = server_stub.Register(node_info)
         except Exception as e:
             print(e)
 
-    def deregister(self, node_id):
-        node = node_pb2.Node(node_id=node_id)
+    def deregister(self):
+        node = node_pb2.Node(node_id=self.node_id)
         try:
             responses = self.server_stub.Deregister(node)
         except Exception as e:
             print(e)
 
     def subscribe(self, topic_name):
-        print("subscribe",topic_name,self.subscriber)
+        print("subscribe", topic_name, self.subscriber)
         if topic_name in self.subscriber:
             return self.subscriber[topic_name].subscribe()
         return None
-        
-    def update_node_status(self,server_stub):
+
+    def update_node_status(self, server_stub):
         try:
             # update node status (alive)
             node_status = node_pb2.NodeStatus(node_id=self.node_id)
-            responses = server_stub.UpdateStatus(node_status,timeout=1)
-            
+            responses = server_stub.UpdateStatus(node_status, timeout=1)
+
         except Exception as e:
             logging.debug('Node (update_node_status): ', e)
 
-    def ntp_sync(self,ntp_stub):
+    def ntp_sync(self, ntp_stub):
         MILLI = 1000
         MICRO = 1000000
         #delta = 25
         try:
             request = ntp_pb2.NtpRequest()
             start = round(time.time() * MICRO)
-            reply = ntp_stub.Query(request,timeout=1)
+            reply = ntp_stub.Query(request, timeout=1)
             m = (round(time.time() * MICRO) - start) / 2
             self.delay = (reply.message - start - m)
-            #print("self.delay: ", self.delay)      
+            #print("self.delay: ", self.delay)
         except Exception as e:
             logging.debug('Node (ntp_sync): ', e)
-        
+
     '''
     def get_topic_info(self, request_node_id, topic_name, topic_type):
         

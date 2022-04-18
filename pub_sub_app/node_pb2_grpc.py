@@ -29,6 +29,11 @@ class ControlStub(object):
                 request_serializer=node__pb2.NodeStatus.SerializeToString,
                 response_deserializer=node__pb2.Empty.FromString,
                 )
+        self.CheckNodeStatus = channel.unary_unary(
+                '/node.Control/CheckNodeStatus',
+                request_serializer=node__pb2.Node.SerializeToString,
+                response_deserializer=node__pb2.NodeAlive.FromString,
+                )
         self.AddTopic = channel.unary_unary(
                 '/node.Control/AddTopic',
                 request_serializer=node__pb2.TopicInfo.SerializeToString,
@@ -92,6 +97,12 @@ class ControlServicer(object):
         raise NotImplementedError('Method not implemented!')
 
     def UpdateStatus(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def CheckNodeStatus(self, request, context):
         """Missing associated documentation comment in .proto file."""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
@@ -168,6 +179,11 @@ def add_ControlServicer_to_server(servicer, server):
                     servicer.UpdateStatus,
                     request_deserializer=node__pb2.NodeStatus.FromString,
                     response_serializer=node__pb2.Empty.SerializeToString,
+            ),
+            'CheckNodeStatus': grpc.unary_unary_rpc_method_handler(
+                    servicer.CheckNodeStatus,
+                    request_deserializer=node__pb2.Node.FromString,
+                    response_serializer=node__pb2.NodeAlive.SerializeToString,
             ),
             'AddTopic': grpc.unary_unary_rpc_method_handler(
                     servicer.AddTopic,
@@ -272,6 +288,23 @@ class Control(object):
         return grpc.experimental.unary_unary(request, target, '/node.Control/UpdateStatus',
             node__pb2.NodeStatus.SerializeToString,
             node__pb2.Empty.FromString,
+            options, channel_credentials,
+            insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
+
+    @staticmethod
+    def CheckNodeStatus(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(request, target, '/node.Control/CheckNodeStatus',
+            node__pb2.Node.SerializeToString,
+            node__pb2.NodeAlive.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
 

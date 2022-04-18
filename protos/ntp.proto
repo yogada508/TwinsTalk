@@ -1,0 +1,14 @@
+syntax = "proto3";
+
+package ntp;
+
+service Ntp {
+	rpc Query (NtpRequest) returns (NtpReply) {}
+}
+
+message NtpRequest {
+}
+
+message NtpReply {
+	int64 message = 1;
+}

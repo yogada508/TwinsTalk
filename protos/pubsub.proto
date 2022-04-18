@@ -1,0 +1,83 @@
+syntax = "proto3";
+
+package data;
+
+service PubSubService {
+    rpc GetBytesData(stream RequestTopicData) returns (stream BytesData) {}
+    rpc GetIntData(stream RequestTopicData) returns (stream IntData) {}
+    rpc GetFloatData(stream RequestTopicData) returns (stream FloatData) {}
+    rpc GetStringData(stream RequestTopicData) returns (stream StringData) {}
+    rpc GetBoolData(stream RequestTopicData) returns (stream BoolData) {}
+
+    rpc PostBytesData(stream BytesData) returns (stream ReplyPostData) {}
+    rpc PostIntData(stream IntData) returns (stream ReplyPostData) {}
+    rpc PostFloatData(stream FloatData) returns (stream ReplyPostData) {}
+    rpc PostStringData(stream StringData) returns (stream ReplyPostData) {}
+    rpc PostBoolData(stream BoolData) returns (stream ReplyPostData) {}
+}
+
+message Empty {}
+
+message RequestTopicData {
+    string node_id = 1;
+    string topic_name = 2;
+    optional string data=3;
+    optional int64 timestamp = 4;      
+}
+
+message ReplyPostData{
+    string node_id = 1;
+    string topic_name = 2;
+    optional string data=3;
+    optional int64 timestamp = 4;
+}
+
+message Node {
+    string node_id = 1;
+}
+
+message BytesData {
+    string node_id=1;
+    string topic_name=2;
+    bytes data = 3;
+    int64 timestamp = 4;
+}
+
+message IntData {
+    string node_id=1;
+    string topic_name=2;
+    int64 data = 3;
+    int64 timestamp = 4;
+}
+
+message FloatData {
+    string node_id=1;
+    string topic_name=2;
+    float data = 3;
+    int64 timestamp = 4;
+}
+
+message StringData {
+    string node_id=1;
+    string topic_name=2;
+    string data = 3;
+    int64 timestamp = 4;
+}
+
+message BoolData {
+    string node_id=1;
+    string topic_name=2;
+    bool data = 3;
+    int64 timestamp = 4;
+}
+
+message DataBuffer{
+    repeated ProtoData buffer=1;
+}
+
+message ProtoData{
+    string type=1;
+    string name=2;
+    bytes data = 3;
+    double timestamp = 4;
+}
