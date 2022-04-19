@@ -512,7 +512,7 @@ class DataBase():
 
     def delete_connection_by_subID(self, sub_node_id):
 
-        sql = 'DELETE FROM Connection WHERE PubNodeID="{}";'.format(sub_node_id)
+        sql = 'DELETE FROM Connection WHERE SubNodeID="{}";'.format(sub_node_id)
         
         try:
             self.execute_with_commit(sql)
