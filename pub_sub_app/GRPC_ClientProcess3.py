@@ -120,11 +120,11 @@ class GRPC_ClientProcess3:
         self.sm = multiprocessing.Manager()
 
         # d means double
-        self.stub = {}
         self.stop_flag = multiprocessing.Event()
         self.update_conn_nock = multiprocessing.Event()
 
-        # elf.connected_stub={}
+        self.topic_addr = {}
+        self.connected_stub={}
         # self.topic_timestamp=self.sm.dict()
 
         self.smm = multiprocessing.managers.SharedMemoryManager()
@@ -261,7 +261,8 @@ class GRPC_ClientProcess3:
                 conn = {}
                 conn["topic_type"] = info["topic_type"]
                 conn["client_mode"] = 1
-                conn["sub_name"] = topic
+                conn["src_topic"] = topic
+                conn["dst_topic"] = info["topic_name"]
                 message = []
                 message.append(pubsub_pb2.RequestTopicData(node_id=self.node_id,
                                                            topic_name=info["topic_name"]))
@@ -290,7 +291,8 @@ class GRPC_ClientProcess3:
                 conn = {}
                 conn["topic_type"] = info["topic_type"]
                 conn["client_mode"] = 0
-                conn["sub_name"] = topic
+                conn["src_topic"] = topic
+                conn["dst_topic"] = info["topic_name"]
                 messages = topics_buffer[topic]
                 # print("messages",messages)
                 for message in messages:
@@ -300,31 +302,42 @@ class GRPC_ClientProcess3:
         return connection_list
 
     def connect_rpcServer(self, connection_info):
-        connection_set = set()
-        stub_set = set(self.stub.keys())
+        addr_list = []
+        dst_topic_list = []
 
         for connection in connection_info:
-            addr, messages = connection[0], connection[2]
-            # add target topic_name to connection_set
-            for message in messages:
-                connection_set.add(message.topic_name)
+            addr, conn = connection[0], connection[1]
+            dst_topic = conn["dst_topic"]
+            addr_list.append(addr)
+            dst_topic_list.append(dst_topic)
 
-        # remove deleted topic_name in stub list
-        for target_topic in stub_set - connection_set:
-            del target_topic
+            # create new stub when the new address appear.
+            if addr not in self.connected_stub.keys():
+                channel = grpc.insecure_channel(addr)
+                stub = pubsub_pb2_grpc.PubSubServiceStub(channel)
+                self.connected_stub[addr] = stub
+            
+            # new topic connection or existed topic connection reset
+            if dst_topic not in self.topic_addr.keys() or addr != self.topic_addr[dst_topic]:
+                self.topic_addr[dst_topic] = addr
 
-        # add new topic_name to stub list
-        for target_topic in connection_set - stub_set:
-            channel = grpc.insecure_channel(addr)
-            stub = pubsub_pb2_grpc.PubSubServiceStub(channel)
-            self.stub[target_topic] = stub
+        # for topic in list(self.topic_addr.keys()):
+        #     if topic not in dst_topic_list:
+        #         print("delete disconnected topic", topic)
+        #         del self.topic_addr[topic]
+
+        # for addr in list(self.connected_stub.keys()):
+        #     if addr not in addr_list:
+        #         print("delete disconnected addr", addr)
+        #         del self.connected_stub[addr]
 
     def request(self, args):
         try:
             info, message = args[1], args[2]
+            dst_topic = info["dst_topic"]
 
-            for i in message:
-                stub = self.stub[i.topic_name]
+            addr = self.topic_addr[dst_topic]
+            stub = self.connected_stub[addr]
 
             if info["client_mode"] == 1:
                 responses = pull_request(stub, message, info["topic_type"])
@@ -374,7 +387,7 @@ class GRPC_ClientProcess3:
                                     print("delay time:", len(
                                         res.data), res.node_id, res.topic_name, res.topic_name, time.time()-res.timestamp/MICRO)
                                     self.write_data(
-                                        res, info['sub_name'], info["topic_type"])
+                                        res, info['src_topic'], info["topic_type"])
 
                 except Exception as e:
                     raise e
