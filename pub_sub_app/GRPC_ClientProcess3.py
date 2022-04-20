@@ -321,15 +321,30 @@ class GRPC_ClientProcess3:
             if dst_topic not in self.topic_addr.keys() or addr != self.topic_addr[dst_topic]:
                 self.topic_addr[dst_topic] = addr
 
-        # for topic in list(self.topic_addr.keys()):
-        #     if topic not in dst_topic_list:
-        #         print("delete disconnected topic", topic)
-        #         del self.topic_addr[topic]
+    def remove_disconnect_stub(self):
+        connection_info = self.connection_info[self.info_pt.value]
+        addr_list = []
+        dst_topic_list = []
 
-        # for addr in list(self.connected_stub.keys()):
-        #     if addr not in addr_list:
-        #         print("delete disconnected addr", addr)
-        #         del self.connected_stub[addr]
+        # get existing connection
+        for topic in connection_info.keys():
+            for info in connection_info[topic]:
+                addr = "{}:{}".format(info["ip"], info["port"])
+                dst_topic = info["topic_name"]
+                addr_list.append(addr)
+                dst_topic_list.append(dst_topic)
+
+        # delete disconnected stub
+        for topic in list(self.topic_addr.keys()):
+            if topic not in dst_topic_list:
+                print("delete disconnected topic", topic)
+                del self.topic_addr[topic]
+
+        for addr in list(self.connected_stub.keys()):
+            if addr not in addr_list:
+                print("delete disconnected addr", addr)
+                del self.connected_stub[addr]
+        
 
     def request(self, args):
         try:
@@ -377,6 +392,8 @@ class GRPC_ClientProcess3:
 
                     if connection_info:
                         self.connect_rpcServer(connection_info)
+
+                    self.remove_disconnect_stub()
 
                     for connection in connection_info:
                         response = self.request(connection)
