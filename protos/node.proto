@@ -11,6 +11,7 @@ service Control {
     rpc AddTopic(TopicInfo) returns (Empty) {}
     rpc DeleteTopic(Topic) returns (Empty) {}
     rpc UpdateTopicStatus(TopicStatus) returns (Empty) {}
+    rpc UpdateTopicState(Topic) returns (TopicAlive) {}
 
     rpc AddSubscribeTopic(SubscribeTopic) returns (Empty) {}
     rpc UpdateSubscribeTopicStatus(SubscribeTopicStatus) returns (Empty) {}
@@ -74,6 +75,10 @@ message Topic {
     string topic_name = 1;
     string topic_type = 2;
     string node_id = 3;
+}
+
+message TopicAlive {
+    bool isAlive = 1;
 }
 
 // for add topic

@@ -19,7 +19,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   syntax='proto3',
   serialized_options=None,
   create_key=_descriptor._internal_create_key,
-  serialized_pb=b'\n\nnode.proto\x12\x04node\"\x07\n\x05\x45mpty\"\x17\n\x04Node\x12\x0f\n\x07node_id\x18\x01 \x01(\t\"X\n\x08NodeInfo\x12\x0f\n\x07node_id\x18\x01 \x01(\t\x12\x11\n\tnode_name\x18\x02 \x01(\t\x12\x13\n\x0bnode_domain\x18\x03 \x01(\t\x12\x13\n\x0bupdate_time\x18\x04 \x01(\x03\"2\n\nNodeStatus\x12\x0f\n\x07node_id\x18\x01 \x01(\t\x12\x13\n\x0bupdate_time\x18\x02 \x01(\x03\"\x1c\n\tNodeAlive\x12\x0f\n\x07isAlive\x18\x01 \x01(\x08\":\n\x11RequestConnection\x12\x0f\n\x07node_id\x18\x01 \x01(\t\x12\x14\n\x0cisSubscriber\x18\x02 \x01(\x08\"B\n\x12ResponseConnection\x12,\n\x0btopics_info\x18\x01 \x03(\x0b\x32\x17.node.ResponseTopicInfo\"\xbb\x01\n\x11ResponseTopicInfo\x12\x16\n\x0epub_topic_name\x18\x01 \x01(\t\x12\x16\n\x0esub_topic_name\x18\x02 \x01(\t\x12\x13\n\x0bpub_node_id\x18\x03 \x01(\t\x12\x13\n\x0bsub_node_id\x18\x04 \x01(\t\x12\x12\n\ntopic_type\x18\x05 \x01(\t\x12\x0c\n\x04mode\x18\x06 \x01(\x03\x12\n\n\x02ip\x18\x07 \x01(\t\x12\x0c\n\x04port\x18\x08 \x01(\x03\x12\x10\n\x08isOnline\x18\t \x01(\x08\"@\n\x05Topic\x12\x12\n\ntopic_name\x18\x01 \x01(\t\x12\x12\n\ntopic_type\x18\x02 \x01(\t\x12\x0f\n\x07node_id\x18\x03 \x01(\t\"\xaf\x01\n\tTopicInfo\x12\x12\n\ntopic_name\x18\x01 \x01(\t\x12\x12\n\ntopic_type\x18\x02 \x01(\t\x12\x0f\n\x07node_id\x18\x03 \x01(\t\x12\x13\n\x0bnode_domain\x18\x04 \x01(\t\x12\x13\n\x0bupdate_time\x18\x05 \x01(\x03\x12\x0c\n\x04mode\x18\x06 \x01(\x03\x12\n\n\x02ip\x18\x07 \x01(\t\x12\x0c\n\x04port\x18\x08 \x01(\x03\x12\x17\n\x0f\x63onnected_nodes\x18\t \x03(\t\"`\n\x0bTopicStatus\x12\x12\n\ntopic_name\x18\x01 \x01(\t\x12\x0f\n\x07node_id\x18\x02 \x01(\t\x12\x17\n\x0f\x63onnected_nodes\x18\x03 \x03(\t\x12\x13\n\x0bupdate_time\x18\x04 \x01(\x03\"\xb4\x01\n\x0eSubscribeTopic\x12\x12\n\ntopic_name\x18\x01 \x01(\t\x12\x12\n\ntopic_type\x18\x02 \x01(\t\x12\x0f\n\x07node_id\x18\x03 \x01(\t\x12\x13\n\x0bnode_domain\x18\x04 \x01(\t\x12\x13\n\x0bupdate_time\x18\x05 \x01(\x03\x12\x0c\n\x04mode\x18\x06 \x01(\x03\x12\n\n\x02ip\x18\x07 \x01(\t\x12\x0c\n\x04port\x18\x08 \x01(\x03\x12\x17\n\x0f\x63onnected_nodes\x18\t \x03(\t\"<\n\x12SubscribeTopicInfo\x12\x12\n\ntopic_name\x18\x01 \x01(\t\x12\x12\n\ntopic_type\x18\x02 \x01(\t\"P\n\x14SubscribeTopicStatus\x12\x12\n\ntopic_name\x18\x01 \x01(\t\x12\x0f\n\x07node_id\x18\x02 \x01(\t\x12\x13\n\x0bupdate_time\x18\x03 \x01(\x03\"~\n\x0e\x43onnectionInfo\x12\x16\n\x0esub_topic_name\x18\x01 \x01(\t\x12\x16\n\x0epub_topic_name\x18\x02 \x01(\t\x12\x12\n\ntopic_type\x18\x03 \x01(\t\x12\x13\n\x0bpub_node_id\x18\x04 \x01(\t\x12\x13\n\x0bsub_node_id\x18\x05 \x01(\t\"%\n\x0c\x43onnectionID\x12\x15\n\rconnection_id\x18\x01 \x01(\t2\xcc\x05\n\x07\x43ontrol\x12)\n\x08Register\x12\x0e.node.NodeInfo\x1a\x0b.node.Empty\"\x00\x12\'\n\nDeregister\x12\n.node.Node\x1a\x0b.node.Empty\"\x00\x12/\n\x0cUpdateStatus\x12\x10.node.NodeStatus\x1a\x0b.node.Empty\"\x00\x12\x30\n\x0f\x43heckNodeStatus\x12\n.node.Node\x1a\x0f.node.NodeAlive\"\x00\x12*\n\x08\x41\x64\x64Topic\x12\x0f.node.TopicInfo\x1a\x0b.node.Empty\"\x00\x12)\n\x0b\x44\x65leteTopic\x12\x0b.node.Topic\x1a\x0b.node.Empty\"\x00\x12\x35\n\x11UpdateTopicStatus\x12\x11.node.TopicStatus\x1a\x0b.node.Empty\"\x00\x12\x38\n\x11\x41\x64\x64SubscribeTopic\x12\x14.node.SubscribeTopic\x1a\x0b.node.Empty\"\x00\x12G\n\x1aUpdateSubscribeTopicStatus\x12\x1a.node.SubscribeTopicStatus\x1a\x0b.node.Empty\"\x00\x12?\n\x14\x44\x65leteSubscribeTopic\x12\x18.node.SubscribeTopicInfo\x1a\x0b.node.Empty\"\x00\x12\x44\n\rGetConnection\x12\x17.node.RequestConnection\x1a\x18.node.ResponseConnection\"\x00\x12\x35\n\x10\x44\x65leteConnection\x12\x12.node.ConnectionID\x1a\x0b.node.Empty\"\x00\x12;\n\rAddConnection\x12\x14.node.ConnectionInfo\x1a\x12.node.ConnectionID\"\x00\x62\x06proto3'
+  serialized_pb=b'\n\nnode.proto\x12\x04node\"\x07\n\x05\x45mpty\"\x17\n\x04Node\x12\x0f\n\x07node_id\x18\x01 \x01(\t\"X\n\x08NodeInfo\x12\x0f\n\x07node_id\x18\x01 \x01(\t\x12\x11\n\tnode_name\x18\x02 \x01(\t\x12\x13\n\x0bnode_domain\x18\x03 \x01(\t\x12\x13\n\x0bupdate_time\x18\x04 \x01(\x03\"2\n\nNodeStatus\x12\x0f\n\x07node_id\x18\x01 \x01(\t\x12\x13\n\x0bupdate_time\x18\x02 \x01(\x03\"\x1c\n\tNodeAlive\x12\x0f\n\x07isAlive\x18\x01 \x01(\x08\":\n\x11RequestConnection\x12\x0f\n\x07node_id\x18\x01 \x01(\t\x12\x14\n\x0cisSubscriber\x18\x02 \x01(\x08\"B\n\x12ResponseConnection\x12,\n\x0btopics_info\x18\x01 \x03(\x0b\x32\x17.node.ResponseTopicInfo\"\xbb\x01\n\x11ResponseTopicInfo\x12\x16\n\x0epub_topic_name\x18\x01 \x01(\t\x12\x16\n\x0esub_topic_name\x18\x02 \x01(\t\x12\x13\n\x0bpub_node_id\x18\x03 \x01(\t\x12\x13\n\x0bsub_node_id\x18\x04 \x01(\t\x12\x12\n\ntopic_type\x18\x05 \x01(\t\x12\x0c\n\x04mode\x18\x06 \x01(\x03\x12\n\n\x02ip\x18\x07 \x01(\t\x12\x0c\n\x04port\x18\x08 \x01(\x03\x12\x10\n\x08isOnline\x18\t \x01(\x08\"@\n\x05Topic\x12\x12\n\ntopic_name\x18\x01 \x01(\t\x12\x12\n\ntopic_type\x18\x02 \x01(\t\x12\x0f\n\x07node_id\x18\x03 \x01(\t\"\x1d\n\nTopicAlive\x12\x0f\n\x07isAlive\x18\x01 \x01(\x08\"\xaf\x01\n\tTopicInfo\x12\x12\n\ntopic_name\x18\x01 \x01(\t\x12\x12\n\ntopic_type\x18\x02 \x01(\t\x12\x0f\n\x07node_id\x18\x03 \x01(\t\x12\x13\n\x0bnode_domain\x18\x04 \x01(\t\x12\x13\n\x0bupdate_time\x18\x05 \x01(\x03\x12\x0c\n\x04mode\x18\x06 \x01(\x03\x12\n\n\x02ip\x18\x07 \x01(\t\x12\x0c\n\x04port\x18\x08 \x01(\x03\x12\x17\n\x0f\x63onnected_nodes\x18\t \x03(\t\"`\n\x0bTopicStatus\x12\x12\n\ntopic_name\x18\x01 \x01(\t\x12\x0f\n\x07node_id\x18\x02 \x01(\t\x12\x17\n\x0f\x63onnected_nodes\x18\x03 \x03(\t\x12\x13\n\x0bupdate_time\x18\x04 \x01(\x03\"\xb4\x01\n\x0eSubscribeTopic\x12\x12\n\ntopic_name\x18\x01 \x01(\t\x12\x12\n\ntopic_type\x18\x02 \x01(\t\x12\x0f\n\x07node_id\x18\x03 \x01(\t\x12\x13\n\x0bnode_domain\x18\x04 \x01(\t\x12\x13\n\x0bupdate_time\x18\x05 \x01(\x03\x12\x0c\n\x04mode\x18\x06 \x01(\x03\x12\n\n\x02ip\x18\x07 \x01(\t\x12\x0c\n\x04port\x18\x08 \x01(\x03\x12\x17\n\x0f\x63onnected_nodes\x18\t \x03(\t\"<\n\x12SubscribeTopicInfo\x12\x12\n\ntopic_name\x18\x01 \x01(\t\x12\x12\n\ntopic_type\x18\x02 \x01(\t\"P\n\x14SubscribeTopicStatus\x12\x12\n\ntopic_name\x18\x01 \x01(\t\x12\x0f\n\x07node_id\x18\x02 \x01(\t\x12\x13\n\x0bupdate_time\x18\x03 \x01(\x03\"~\n\x0e\x43onnectionInfo\x12\x16\n\x0esub_topic_name\x18\x01 \x01(\t\x12\x16\n\x0epub_topic_name\x18\x02 \x01(\t\x12\x12\n\ntopic_type\x18\x03 \x01(\t\x12\x13\n\x0bpub_node_id\x18\x04 \x01(\t\x12\x13\n\x0bsub_node_id\x18\x05 \x01(\t\"%\n\x0c\x43onnectionID\x12\x15\n\rconnection_id\x18\x01 \x01(\t2\x81\x06\n\x07\x43ontrol\x12)\n\x08Register\x12\x0e.node.NodeInfo\x1a\x0b.node.Empty\"\x00\x12\'\n\nDeregister\x12\n.node.Node\x1a\x0b.node.Empty\"\x00\x12/\n\x0cUpdateStatus\x12\x10.node.NodeStatus\x1a\x0b.node.Empty\"\x00\x12\x30\n\x0f\x43heckNodeStatus\x12\n.node.Node\x1a\x0f.node.NodeAlive\"\x00\x12*\n\x08\x41\x64\x64Topic\x12\x0f.node.TopicInfo\x1a\x0b.node.Empty\"\x00\x12)\n\x0b\x44\x65leteTopic\x12\x0b.node.Topic\x1a\x0b.node.Empty\"\x00\x12\x35\n\x11UpdateTopicStatus\x12\x11.node.TopicStatus\x1a\x0b.node.Empty\"\x00\x12\x33\n\x10UpdateTopicState\x12\x0b.node.Topic\x1a\x10.node.TopicAlive\"\x00\x12\x38\n\x11\x41\x64\x64SubscribeTopic\x12\x14.node.SubscribeTopic\x1a\x0b.node.Empty\"\x00\x12G\n\x1aUpdateSubscribeTopicStatus\x12\x1a.node.SubscribeTopicStatus\x1a\x0b.node.Empty\"\x00\x12?\n\x14\x44\x65leteSubscribeTopic\x12\x18.node.SubscribeTopicInfo\x1a\x0b.node.Empty\"\x00\x12\x44\n\rGetConnection\x12\x17.node.RequestConnection\x1a\x18.node.ResponseConnection\"\x00\x12\x35\n\x10\x44\x65leteConnection\x12\x12.node.ConnectionID\x1a\x0b.node.Empty\"\x00\x12;\n\rAddConnection\x12\x14.node.ConnectionInfo\x1a\x12.node.ConnectionID\"\x00\x62\x06proto3'
 )
 
 
@@ -411,6 +411,38 @@ _TOPIC = _descriptor.Descriptor(
 )
 
 
+_TOPICALIVE = _descriptor.Descriptor(
+  name='TopicAlive',
+  full_name='node.TopicAlive',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  create_key=_descriptor._internal_create_key,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='isAlive', full_name='node.TopicAlive.isAlive', index=0,
+      number=1, type=8, cpp_type=7, label=1,
+      has_default_value=False, default_value=False,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  serialized_options=None,
+  is_extendable=False,
+  syntax='proto3',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=610,
+  serialized_end=639,
+)
+
+
 _TOPICINFO = _descriptor.Descriptor(
   name='TopicInfo',
   full_name='node.TopicInfo',
@@ -494,8 +526,8 @@ _TOPICINFO = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=611,
-  serialized_end=786,
+  serialized_start=642,
+  serialized_end=817,
 )
 
 
@@ -547,8 +579,8 @@ _TOPICSTATUS = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=788,
-  serialized_end=884,
+  serialized_start=819,
+  serialized_end=915,
 )
 
 
@@ -635,8 +667,8 @@ _SUBSCRIBETOPIC = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=887,
-  serialized_end=1067,
+  serialized_start=918,
+  serialized_end=1098,
 )
 
 
@@ -674,8 +706,8 @@ _SUBSCRIBETOPICINFO = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1069,
-  serialized_end=1129,
+  serialized_start=1100,
+  serialized_end=1160,
 )
 
 
@@ -720,8 +752,8 @@ _SUBSCRIBETOPICSTATUS = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1131,
-  serialized_end=1211,
+  serialized_start=1162,
+  serialized_end=1242,
 )
 
 
@@ -780,8 +812,8 @@ _CONNECTIONINFO = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1213,
-  serialized_end=1339,
+  serialized_start=1244,
+  serialized_end=1370,
 )
 
 
@@ -812,8 +844,8 @@ _CONNECTIONID = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1341,
-  serialized_end=1378,
+  serialized_start=1372,
+  serialized_end=1409,
 )
 
 _RESPONSECONNECTION.fields_by_name['topics_info'].message_type = _RESPONSETOPICINFO
@@ -826,6 +858,7 @@ DESCRIPTOR.message_types_by_name['RequestConnection'] = _REQUESTCONNECTION
 DESCRIPTOR.message_types_by_name['ResponseConnection'] = _RESPONSECONNECTION
 DESCRIPTOR.message_types_by_name['ResponseTopicInfo'] = _RESPONSETOPICINFO
 DESCRIPTOR.message_types_by_name['Topic'] = _TOPIC
+DESCRIPTOR.message_types_by_name['TopicAlive'] = _TOPICALIVE
 DESCRIPTOR.message_types_by_name['TopicInfo'] = _TOPICINFO
 DESCRIPTOR.message_types_by_name['TopicStatus'] = _TOPICSTATUS
 DESCRIPTOR.message_types_by_name['SubscribeTopic'] = _SUBSCRIBETOPIC
@@ -898,6 +931,13 @@ Topic = _reflection.GeneratedProtocolMessageType('Topic', (_message.Message,), {
   })
 _sym_db.RegisterMessage(Topic)
 
+TopicAlive = _reflection.GeneratedProtocolMessageType('TopicAlive', (_message.Message,), {
+  'DESCRIPTOR' : _TOPICALIVE,
+  '__module__' : 'node_pb2'
+  # @@protoc_insertion_point(class_scope:node.TopicAlive)
+  })
+_sym_db.RegisterMessage(TopicAlive)
+
 TopicInfo = _reflection.GeneratedProtocolMessageType('TopicInfo', (_message.Message,), {
   'DESCRIPTOR' : _TOPICINFO,
   '__module__' : 'node_pb2'
@@ -956,8 +996,8 @@ _CONTROL = _descriptor.ServiceDescriptor(
   index=0,
   serialized_options=None,
   create_key=_descriptor._internal_create_key,
-  serialized_start=1381,
-  serialized_end=2097,
+  serialized_start=1412,
+  serialized_end=2181,
   methods=[
   _descriptor.MethodDescriptor(
     name='Register',
@@ -1030,9 +1070,19 @@ _CONTROL = _descriptor.ServiceDescriptor(
     create_key=_descriptor._internal_create_key,
   ),
   _descriptor.MethodDescriptor(
+    name='UpdateTopicState',
+    full_name='node.Control.UpdateTopicState',
+    index=7,
+    containing_service=None,
+    input_type=_TOPIC,
+    output_type=_TOPICALIVE,
+    serialized_options=None,
+    create_key=_descriptor._internal_create_key,
+  ),
+  _descriptor.MethodDescriptor(
     name='AddSubscribeTopic',
     full_name='node.Control.AddSubscribeTopic',
-    index=7,
+    index=8,
     containing_service=None,
     input_type=_SUBSCRIBETOPIC,
     output_type=_EMPTY,
@@ -1042,7 +1092,7 @@ _CONTROL = _descriptor.ServiceDescriptor(
   _descriptor.MethodDescriptor(
     name='UpdateSubscribeTopicStatus',
     full_name='node.Control.UpdateSubscribeTopicStatus',
-    index=8,
+    index=9,
     containing_service=None,
     input_type=_SUBSCRIBETOPICSTATUS,
     output_type=_EMPTY,
@@ -1052,7 +1102,7 @@ _CONTROL = _descriptor.ServiceDescriptor(
   _descriptor.MethodDescriptor(
     name='DeleteSubscribeTopic',
     full_name='node.Control.DeleteSubscribeTopic',
-    index=9,
+    index=10,
     containing_service=None,
     input_type=_SUBSCRIBETOPICINFO,
     output_type=_EMPTY,
@@ -1062,7 +1112,7 @@ _CONTROL = _descriptor.ServiceDescriptor(
   _descriptor.MethodDescriptor(
     name='GetConnection',
     full_name='node.Control.GetConnection',
-    index=10,
+    index=11,
     containing_service=None,
     input_type=_REQUESTCONNECTION,
     output_type=_RESPONSECONNECTION,
@@ -1072,7 +1122,7 @@ _CONTROL = _descriptor.ServiceDescriptor(
   _descriptor.MethodDescriptor(
     name='DeleteConnection',
     full_name='node.Control.DeleteConnection',
-    index=11,
+    index=12,
     containing_service=None,
     input_type=_CONNECTIONID,
     output_type=_EMPTY,
@@ -1082,7 +1132,7 @@ _CONTROL = _descriptor.ServiceDescriptor(
   _descriptor.MethodDescriptor(
     name='AddConnection',
     full_name='node.Control.AddConnection',
-    index=12,
+    index=13,
     containing_service=None,
     input_type=_CONNECTIONINFO,
     output_type=_CONNECTIONID,
