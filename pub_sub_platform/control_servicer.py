@@ -116,6 +116,32 @@ class ControlServicer(node_pb2_grpc.ControlServicer):
 
         return node_pb2.Empty()
 
+    def UpdateTopicState(self, request: node_pb2.Topic, context) -> node_pb2.TopicAlive:
+        try:
+            topic_alive = node_pb2.TopicAlive()
+
+            if request.topic_name.startswith("pub/server/"):
+                client_name = (request.topic_name.split(":", 1)[1]).split("_")[0]
+
+                if(client_name.endswith("Client")):
+                    node_id = f"pub/client/{client_name}"
+                    node = self.db.get_target_node(node_id)
+                    
+                    if not node:
+                        self.db.delete_topic(request.topic_name, request.topic_type, request.node_id)
+                        topic_alive.isAlive = False
+                        return topic_alive
+
+            self.db.update_topic_time(request.topic_name, request.node_id, self.get_current_time())
+            topic_alive.isAlive = True
+            
+            return topic_alive
+
+        except Exception as e:
+            context.set_code(grpc.StatusCode.NOT_FOUND)
+            context.set_details(str(e))
+            return node_pb2.TopicAlive(isAlive=True)
+
     def UpdateTopicStatus(self, request: node_pb2.TopicStatus, context) -> node_pb2.Empty:
 
         print('Update: TopicName={}, NodeID={}, ConnectedNodes={}'.format(

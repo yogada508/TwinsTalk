@@ -76,43 +76,45 @@ class Publisher():
             topic_config['port'] = 0
 
         self.node = node
-        self.publishment = {}
-        for topic in topic_config['topic_info']:
-            topicID = "{}:{}".format(node.node_id, topic)
-            self.publishment[topicID] = topic_config['topic_info'][topic]
-
         self.topic_ip = topic_config['ip']
         self.topic_port = topic_config['port']
         self.topic_mode = topic_config['mode']
+
         if LITE:
             self.buffer_maxlen = 5
         else:
             self.buffer_maxlen = 20
         self.update_timing = update_timing
 
-        # init buffer
+        # signal handler
+        signal.signal(signal.SIGUSR1, self.sync_topic)
+
+        # buffer
+        self.publishment = {}
         self.topics_buffer = {}
         self.topics_connected_nodes = {}
         self.pub_push_connection = {}
         self.connected_topic = {}
 
-        # add topic to server
-        self.publish_topic()
-
-        # shared memory for add or delete topic
-        self.topic_action_queue = multiprocessing.Queue()
-        self.topic_status = multiprocessing.Manager().dict()
-
-        # shared memory for connection info
+        # shared memory
         self.sm = multiprocessing.Manager()
+        self.topic_status = self.sm.dict()
         self.connection_info = self.sm.list()
         for i in range(2):
             self.connection_info.append(self.sm.dict())
         self.info_pt = self.sm.Value('i', 0)
 
+        # init buffer
+        for topic in topic_config['topic_info']:
+            topicID = "{}:{}".format(node.node_id, topic)
+            self.publishment[topicID] = topic_config['topic_info'][topic]
+            self.topic_status[topicID] = topic_config['topic_info'][topic]
+
+        # add topic to server
+        self.publish_topic()
+ 
         self.serverProcess = None
         self.clientProcess = None
-
         if self.topic_mode == 0:
             self.serverProcess = GRPC_ServerProcess(
                 self.node, self.topic_port, self.topics_buffer, 0)
@@ -120,15 +122,32 @@ class Publisher():
             self.clientProcess = GRPC_ClientProcess(self.node, 0)
 
         self.sub_stub = {}
-        # self.stop_flag=threading.Event()
         self.stop_flag = multiprocessing.Event()
         if LITE:
             self.thread = threading.Thread(target=self.run)
         else:
             # self.thread = threading.Thread(target=self.run)
-            self.thread = multiprocessing.Process(target=self.run)
+            self.thread = multiprocessing.Process(target=self.run, args=(os.getpid(),))
 
         self.thread.start()
+        self.child_pid = self.thread.pid
+        print(f"Parent pid={os.getpid()}, Child pid={self.child_pid}")
+
+    def sync_topic(self, signum, stack):
+        print(f"{os.getpid()} Sync topic ......")
+  
+        try:
+            set1 = set(self.publishment)
+            set2 = set(self.topic_status.keys())
+            # add topic
+            for topic_name in list(set2-set1):
+                self.add_topic_to_buffer(topic_name, self.topic_status[topic_name])
+            # remove topic
+            for topic_name in list(set1-set2):
+                self.delete_topic_from_buffer(topic_name)
+
+        except Exception as e:
+            print(e)
 
     def ResponseTopicInfosToDict(self, topics_info):
         res = {}
@@ -151,100 +170,135 @@ class Publisher():
 
     # init topic
     def publish_topic(self):
-        for topic_name, topic_type in self.publishment.items():
-            self._add_topic_to_buffer(topic_name, topic_type)
+        try:
+            channel = grpc.insecure_channel('{}:{}'.format(self.node.server_ip, self.node.server_port))
+            server_stub = node_pb2_grpc.ControlStub(channel)
+            
+            for topic_name, topic_type in self.publishment.items():
+                # print("add topic", topic_name)
+                topic_info = node_pb2.TopicInfo(
+                                                topic_name=topic_name,
+                                                topic_type=topic_type,
+                                                mode=self.topic_mode,
+                                                ip=self.topic_ip,
+                                                port=self.topic_port,
+                                                node_id=self.node.node_id,
+                                                node_domain=self.node.node_domain
+                                            )
+                responses = server_stub.AddTopic(topic_info)
+                self.add_topic_to_buffer(topic_name, topic_type)
+
+            channel.close()
+
+        except Exception as e:
+            print(f"[Failed] Publish Topic.")
+            print(e)
 
     def add_topic(self, topic_name, topic_type):
         if self.topic_mode == 0:
-            print("Add topic in publisher mode'0' not support currently!")
+            print("[Failed] Add topic in publisher mode'0' not support currently!")
             return
+        
+        topic_name = f"{self.node.node_id}:{topic_name}"
+        
+        try:
+            channel = grpc.insecure_channel('{}:{}'.format(self.node.server_ip, self.node.server_port))
+            server_stub = node_pb2_grpc.ControlStub(channel)
+            topic_info = node_pb2.TopicInfo(
+                                            topic_name=topic_name,
+                                            topic_type=topic_type,
+                                            mode=self.topic_mode,
+                                            ip=self.topic_ip,
+                                            port=self.topic_port,
+                                            node_id=self.node.node_id,
+                                            node_domain=self.node.node_domain
+                                           )
+            responses = server_stub.AddTopic(topic_info)
+            self.add_topic_to_buffer(topic_name, topic_type)
+            channel.close()
+            # send signal to run process
+            # print(f"Sending signal to run proc. Add topic: {topic_name}")
+            os.kill(self.child_pid, signal.SIGUSR1)
 
-        topic_name = self.node.node_id + ":" + topic_name
-        action = {
-            "action": "add_topic",
-            "topic_type": topic_type,
-            "topic_name": topic_name
-        }
-        self.topic_action_queue.put(action)
-        self._add_topic_to_buffer(topic_name, topic_type)
+            print(f"[Success] Add topic {topic_name}.")
 
-        while True:
-            if topic_name in self.topic_status.keys():
-                print("add topic success")
-                break
+        except Exception as e:
+            print(f"[Failed] Add topic {topic_name}.")
+            print(e)
 
-    def delete_topic(self, topic_name, topic_type):
+    def delete_topic(self, topic_name):
+        try:
+            topic_name = f"{self.node.node_id}:{topic_name}"
+            if topic_name not in self.publishment:
+                return f"Topic {topic_name} not found."
+            
 
-        topic_name = self.node.node_id + ":" + topic_name
-        action = {
-            "action": "delete_topic",
-            "topic_name": topic_name,
-            "topic_type": topic_type
-        }
-        self.topic_action_queue.put(action)
-        self._delete_topic_from_buffer(topic_name)
-        del self.topic_status[topic_name]
+            channel = grpc.insecure_channel('{}:{}'.format(self.node.server_ip, self.node.server_port))
+            server_stub = node_pb2_grpc.ControlStub(channel)
 
-    def _add_topic_to_buffer(self, topic_name, topic_type):
+            topic_type = self.publishment[topic_name]
+            topic = node_pb2.Topic(topic_name=topic_name, topic_type=topic_type, node_id=self.node.node_id)
+            server_stub.DeleteTopic(topic)
+            self.delete_topic_from_buffer(topic_name)
+
+            channel.close()
+            # send signal to run process
+            # print(f"Sending signal to run proc. Delete topic: {topic_name}")
+            os.kill(self.child_pid, signal.SIGUSR1)
+
+            print(f"[Success] Delete topic {topic_name}.")
+        
+        except Exception as e:
+            print(f"[Failed] Delete topic {topic_name}.")
+            print(e)
+
+    def add_topic_to_buffer(self, topic_name, topic_type):
         self.publishment[topic_name] = topic_type
         self.topics_buffer[topic_name] = collections.deque(
             maxlen=self.buffer_maxlen)
         self.topics_connected_nodes[topic_name] = []
         self.pub_push_connection[topic_name] = []
         self.connected_topic[topic_name] = []
+        self.topic_status[topic_name] = topic_type
 
-    def _delete_topic_from_buffer(self, topic_name):
+    def delete_topic_from_buffer(self, topic_name):
         self.publishment.pop(topic_name)
         self.topics_buffer.pop(topic_name)
         self.topics_connected_nodes.pop(topic_name)
         self.pub_push_connection.pop(topic_name)
         self.connected_topic.pop(topic_name)
-
-    # add new topic to buffer or delete topic regularly
-    def _check_topic_action(self, server_stub):
-        if not self.topic_action_queue.empty():
-            topic = self.topic_action_queue.get()
-
-            if topic["action"] == "add_topic":
-                self._add_topic_to_buffer(
-                    topic["topic_name"], topic["topic_type"])
-            else:
-                Topic = node_pb2.Topic(
-                    topic_name=topic["topic_name"], topic_type=topic["topic_type"], node_id=self.node.node_id)
-                server_stub.DeleteTopic(Topic)
-                self._delete_topic_from_buffer(topic["topic_name"])
+        if topic_name in self.topic_status:
+            del self.topic_status[topic_name]
 
     # update or add topic from buffer regularly
-    def _update_publishment(self, server_stub):
+    def update_publishment(self, server_stub):
         try:
-            for topic_name, topic_type in self.publishment.items():
-                # create topic buffer
-                # add topic to server
-                topic = node_pb2.TopicInfo(topic_name=topic_name,
-                                           topic_type=topic_type,
-                                           mode=self.topic_mode,
-                                           ip=self.topic_ip,
-                                           port=self.topic_port,
-                                           node_id=self.node.node_id,
-                                           node_domain=self.node.node_domain)
-                topic.connected_nodes.extend(self.connected_topic[topic_name])
-                responses = server_stub.AddTopic(topic)
-                self.topic_status[topic_name] = True
+            # print(f"update_publishment: {list(self.publishment)}")
+            for topic_name in list(self.publishment):
+                topic_type = self.publishment[topic_name]
+                topic = node_pb2.Topic(topic_name=topic_name, topic_type=topic_type, node_id=self.node.node_id)
+                topic_alive = server_stub.UpdateTopicState(topic)
+                if not topic_alive.isAlive:
+                    self.delete_topic_from_buffer(topic_name)
+                    # print(f"{topic_name} is deleted. Sending signal......")
+                    os.kill(self.parent_pid, signal.SIGUSR1)
+
         except Exception as e:
-            print("publish_topic", e)
+            print("[Failed] Update publishment.")
+            print(e)
 
     # not used
-    def update_topic_status(self, server_stub):
-        try:
-            for topic_name in self.topics_connected_nodes:
-                topic_status = node_pb2.TopicStatus(
-                    topic_name=topic_name, node_id=self.node.node_id)
-                topic_status.connected_nodes.extend(
-                    self.topics_connected_nodes[topic_name])
-                responses = server_stub.UpdateTopicStatus(topic_status)
-                self.topics_connected_nodes[topic_name].clear()
-        except Exception as e:
-            print(e)
+    # def update_topic_status(self, server_stub):
+    #     try:
+    #         for topic_name in self.topics_connected_nodes:
+    #             topic_status = node_pb2.TopicStatus(
+    #                 topic_name=topic_name, node_id=self.node.node_id)
+    #             topic_status.connected_nodes.extend(
+    #                 self.topics_connected_nodes[topic_name])
+    #             responses = server_stub.UpdateTopicStatus(topic_status)
+    #             self.topics_connected_nodes[topic_name].clear()
+    #     except Exception as e:
+    #         print(e)
 
 ##################################################
 # CONNECTION OPERATION
@@ -278,21 +332,19 @@ class Publisher():
         )
 
         try:
-            with grpc.insecure_channel('{}:{}'.format(self.node.server_ip, self.node.server_port)) as channel:
-                server_stub = node_pb2_grpc.ControlStub(channel)
-                response = server_stub.AddConnection(ConnectionInfo)
+            channel = grpc.insecure_channel('{}:{}'.format(self.node.server_ip, self.node.server_port))
+            server_stub = node_pb2_grpc.ControlStub(channel)
+            response = server_stub.AddConnection(ConnectionInfo)
+            connection_id = response.connection_id
 
-                connection_id = response.connection_id
+            if connection_id != "-1":
+                while True:
+                    if self.has_connection(args["pub_topic_name"], args["sub_topic_name"]):
+                        break
 
-                if connection_id != "-1":
-                    while True:
-                        if self.has_connection(args["pub_topic_name"], args["sub_topic_name"]):
-                            break
-
-                    print(f"added ConnectionID = {connection_id}.")
-                else:
-                    print(
-                        f"[Failed] Add Connection: {args['pub_topic_name']} and {args['sub_topic_name']}")
+                print(f"[Success] Added ConnectionID = {connection_id}.")
+            else:
+                print(f"[Failed] Add Connection: {args['pub_topic_name']} and {args['sub_topic_name']}")
 
             return connection_id
 
@@ -301,14 +353,21 @@ class Publisher():
             return "-1"
 
     def delete_connection(self, connection_id):
-        ConnectionID = node_pb2.ConnectionID(connection_id=connection_id)
+        try:
+            ConnectionID = node_pb2.ConnectionID(connection_id=connection_id)
 
-        with grpc.insecure_channel('{}:{}'.format(self.node.server_ip, self.node.server_port)) as channel:
+            channel = grpc.insecure_channel('{}:{}'.format(self.node.server_ip, self.node.server_port))
             server_stub = node_pb2_grpc.ControlStub(channel)
             response = server_stub.DeleteConnection(ConnectionID)
-            print(f"connection_id = {connection_id} is deleted!")
+            print(f"[Success] Delete connection, id={connection_id}.")
 
-    def _get_connection(self, server_stub):
+            channel.close()
+        
+        except Exception as e:
+            print(f"[Failed] Delete connection, id={connection_id}")
+            print(e)
+
+    def get_connection(self, server_stub):
         try:
             # update node status (alive)
             request_connection = node_pb2.RequestConnection(
@@ -366,7 +425,6 @@ class Publisher():
             self.serverProcess.write_data(proto_data, topic_name, data_type)
         else:
             self.clientProcess.write_data(proto_data, topic_name, data_type)
-        #self.topics_buffer[topic_name].append([topic_data, self.get_sync_time()])
 
     def terminate(self):
         try:
@@ -381,8 +439,9 @@ class Publisher():
         except Exception as e:
             print("terminate publisher failed", e)
 
-    def run(self):
+    def run(self, parent_pid):
         print(f"Publisher {self.node.node_id} started!")
+        self.parent_pid = parent_pid
 
         try:
             with grpc.insecure_channel('{}:{}'.format(self.node.server_ip, self.node.server_port)) as channel:
@@ -392,10 +451,9 @@ class Publisher():
                 while not self.stop_flag.wait(1):
                     self.node.update_node_status(server_stub)
                     self.node.ntp_sync(ntp_stub)
-                    self._check_topic_action(server_stub)
-                    self._update_publishment(server_stub)
+                    self.update_publishment(server_stub)
                     if self.topic_mode == 1:
-                        self._get_connection(server_stub)
+                        self.get_connection(server_stub)
                     # time.sleep(0.001)
 
         except Exception as e:

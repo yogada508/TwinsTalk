@@ -49,6 +49,11 @@ class ControlStub(object):
                 request_serializer=node__pb2.TopicStatus.SerializeToString,
                 response_deserializer=node__pb2.Empty.FromString,
                 )
+        self.UpdateTopicState = channel.unary_unary(
+                '/node.Control/UpdateTopicState',
+                request_serializer=node__pb2.Topic.SerializeToString,
+                response_deserializer=node__pb2.TopicAlive.FromString,
+                )
         self.AddSubscribeTopic = channel.unary_unary(
                 '/node.Control/AddSubscribeTopic',
                 request_serializer=node__pb2.SubscribeTopic.SerializeToString,
@@ -121,6 +126,12 @@ class ControlServicer(object):
         raise NotImplementedError('Method not implemented!')
 
     def UpdateTopicStatus(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def UpdateTopicState(self, request, context):
         """Missing associated documentation comment in .proto file."""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
@@ -199,6 +210,11 @@ def add_ControlServicer_to_server(servicer, server):
                     servicer.UpdateTopicStatus,
                     request_deserializer=node__pb2.TopicStatus.FromString,
                     response_serializer=node__pb2.Empty.SerializeToString,
+            ),
+            'UpdateTopicState': grpc.unary_unary_rpc_method_handler(
+                    servicer.UpdateTopicState,
+                    request_deserializer=node__pb2.Topic.FromString,
+                    response_serializer=node__pb2.TopicAlive.SerializeToString,
             ),
             'AddSubscribeTopic': grpc.unary_unary_rpc_method_handler(
                     servicer.AddSubscribeTopic,
@@ -356,6 +372,23 @@ class Control(object):
         return grpc.experimental.unary_unary(request, target, '/node.Control/UpdateTopicStatus',
             node__pb2.TopicStatus.SerializeToString,
             node__pb2.Empty.FromString,
+            options, channel_credentials,
+            insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
+
+    @staticmethod
+    def UpdateTopicState(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(request, target, '/node.Control/UpdateTopicState',
+            node__pb2.Topic.SerializeToString,
+            node__pb2.TopicAlive.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
 
