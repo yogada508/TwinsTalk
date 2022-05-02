@@ -16,8 +16,8 @@ def main():
     data = file.read()
 
     print("send time: ", time.time())
-    tt_client.pub.data_writer('video_name', "two-hands_edited.mp4")
-    tt_client.pub.data_writer('video_data', data)
+    tt_client.pub.data_writer('videoName', "two-hands_edited.mp4")
+    tt_client.pub.data_writer('videoData', data)
     print("end, len of file", len(data))
 
     while True:

@@ -1,13 +1,13 @@
 {
-    "client_name": "01.UPDRS_client",
+    "client_name": "01.updrsClient",
     "service": "UPDRS_tapping",
     "input": [
         {
-            "topic_name": "video_name",
+            "topic_name": "videoName",
             "data_type": "str"
         },
         {
-            "topic_name": "video_data",
+            "topic_name": "videoData",
             "data_type": "bytes"
         }
     ],
@@ -22,11 +22,11 @@
             "calculator": "mediapipe",
             "input": [
                 {
-                    "topic_name": "video_name",
+                    "topic_name": "videoName",
                     "data_type": "str"
                 },
                 {
-                    "topic_name": "video_data",
+                    "topic_name": "videoData",
                     "data_type": "bytes"
                 }
             ],

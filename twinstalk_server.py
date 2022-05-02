@@ -13,12 +13,28 @@ import sys
 
 manager = Manager()
 
+def slave_service(data, pub_queue):
+    client_id = data["client_id"]
+    client_name = (client_id.split("/"))[-1]
+    client_data = data["client_data"]
+    result_data = {
+        "annotation": client_data["videoName"] + "_result"
+    }
 
-def start_subscriber(config, buffer):
+    result = {
+        "client_name": client_name,
+        "result_data": result_data
+    }
+
+    pub_queue.put(result)
+
+
+def start_subscriber(config, sub_queue):
     sub_node = node_api.Node(config["node_config"])
     sub = Subscriber.Subscriber(sub_node, config["topic_config"])
     time.sleep(3)
 
+    data_buffer = {}
     while True:
         try:
             sub.updata_data()
@@ -28,96 +44,66 @@ def start_subscriber(config, buffer):
                 info = sub.read_topic(topic)
 
                 if info is not None:
-                    if info.node_id not in buffer:
-                        buffer[info.node_id] = manager.dict()
-                    buffer[info.node_id][topic] = info.data
+                    if info.node_id not in data_buffer:
+                        data_buffer[info.node_id] = manager.dict()
+                    data_buffer[info.node_id][topic] = info.data
+
+            # check client's datas are ready
+            for node_id in list(data_buffer.keys()):
+                if set(topics) == set(data_buffer[node_id].keys()):
+                    data = {
+                        "client_id": node_id,
+                        "client_data": data_buffer[node_id]
+                    }
+                    sub_queue.put(data)
+                    del data_buffer[node_id]
 
         except Exception as e:
             sub.terminate()
             raise e
 
 
-def start_publisher(config, buffer):
+def start_publisher(config, pub_queue):
     pub_node = node_api.Node(config["node_config"])
     pub = Publisher.Publisher(pub_node, config["topic_config"])
     topic_dict = config["topic_config"]["topic_info"]
     time.sleep(5)
 
     while True:
-        # if not buffer: continue
+        data = pub_queue.get()
+        client_name = data["client_name"]
 
-        del_node_list = []
-        for node_id in list(buffer.keys()):
-            if set(topic_dict.keys()) != set(buffer[node_id].keys()):
-                continue
+        for topic in list(data["result_data"].keys()):
+            client_topic = f"{client_name}_{topic}"
+            result = data["result_data"][topic]
 
-            # del_topic_list = []
-            for topic in list(buffer[node_id].keys()):
-                client_name = (node_id.split("/"))[-1]
-                client_topic = f"{client_name}_{topic}"
+            pub.add_topic(client_topic, topic_dict[topic])
 
-                pub.add_topic(client_topic, topic_dict[topic])
+            pub_topic_name = f"{config['node_config']['node_id']}:{client_topic}"
+            sub_topic_name = f"sub/agent/{client_name}:{topic}_I"
+            connection_id = pub.add_connection(
+                pub_node_id=config['node_config']['node_id'],
+                sub_node_id=f"sub/agent/{client_name}",
+                pub_topic_name=pub_topic_name,
+                sub_topic_name=sub_topic_name,
+                topic_type=topic_dict[topic]
+            )
 
-                pub_topic_name = f"{config['node_config']['node_id']}:{client_topic}"
-                sub_topic_name = f"sub/agent/{client_name}:{topic}_I"
-                connection_id = pub.add_connection(
-                    pub_node_id=config['node_config']['node_id'],
-                    sub_node_id=f"sub/agent/{client_name}",
-                    pub_topic_name=pub_topic_name,
-                    sub_topic_name=sub_topic_name,
-                    topic_type=topic_dict[topic]
-                )
-
-                if connection_id != "-1":
-                    pub.data_writer(client_topic, buffer[node_id][topic])
-                    # del_topic_list.append(topic)
-
-            # delete topic in buffer
-            # for d in del_topic_list:
-            #     if d in buffer[node_id]:
-            #         del buffer[node_id][d]
-            # print(del_topic_list)
-            # print(buffer)
-            # if len(buffer[node_id].keys()) == 0:
-            del_node_list.append(node_id)
-
-        # delete node in buffer
-        for d in del_node_list:
-            if d in buffer:
-                del buffer[d]
+            if connection_id != "-1":
+                pub.data_writer(client_topic, result)
+            
 
 
-def start_service(pub_config, sub_config, buffer1, buffer2):
+def start_service(pub_config, sub_config, sub_queue, pub_queue):
     sub_topic_dict = sub_config["topic_config"]["topic_info"]
     pub_topic_dict = pub_config["topic_config"]["topic_info"]
 
     while True:
-        del_node_list = []
-        for node_id in list(buffer1.keys()):
-            if set(buffer1[node_id].keys()) != set(sub_topic_dict.keys()):
-                continue
+        data = sub_queue.get()
+        slave = Process(target=slave_service, args=(data, pub_queue))
+        slave.daemon = True
+        slave.start()
 
-            # ==================================
-            # Data processing...
-            # buffer1[node_id] --> get args
-            result = {
-                "annotation": "I got annoatation result!!"
-            }
-            # ==================================
-
-            if set(result.keys()) != set(pub_topic_dict.keys()):
-                print("Service result key not match.")
-                continue
-
-            if node_id not in buffer2:
-                buffer2[node_id] = manager.dict()
-            buffer2[node_id] = result
-
-            del_node_list.append(node_id)
-
-        for d in del_node_list:
-            if d in buffer1:
-                del buffer1[d]
 
 
 class TwinsTalk_Server():
@@ -127,15 +113,15 @@ class TwinsTalk_Server():
 
     def run(self):
         # manager = Manager()
-        buffer1 = manager.dict()
-        buffer2 = manager.dict()
+        sub_queue = manager.Queue()
+        pub_queue = manager.Queue()
 
         sub_process = Process(target=start_subscriber,
-                              args=(self.sub_config, buffer1,))
+                              args=(self.sub_config, sub_queue,))
         pub_process = Process(target=start_publisher,
-                              args=(self.pub_config, buffer2,))
+                              args=(self.pub_config, pub_queue,))
         service_process = Process(target=start_service, args=(
-            self.pub_config, self.sub_config, buffer1, buffer2))
+            self.pub_config, self.sub_config, sub_queue, pub_queue))
 
         sub_process.start()
         service_process.start()
