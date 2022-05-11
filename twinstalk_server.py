@@ -13,13 +13,15 @@ import sys
 
 manager = Manager()
 
-def slave_service(data, pub_queue):
+def slave_service(func, data, pub_queue):
     client_id = data["client_id"]
     client_name = (client_id.split("/"))[-1]
     client_data = data["client_data"]
-    result_data = {
-        "annotation": client_data["videoName"] + "_result"
-    }
+
+    # ====================
+    # call user defined function
+    result_data = func(client_data)
+    # ====================
 
     result = {
         "client_name": client_name,
@@ -94,22 +96,23 @@ def start_publisher(config, pub_queue):
             
 
 
-def start_service(pub_config, sub_config, sub_queue, pub_queue):
-    sub_topic_dict = sub_config["topic_config"]["topic_info"]
-    pub_topic_dict = pub_config["topic_config"]["topic_info"]
+def start_service(func, sub_queue, pub_queue):
 
     while True:
         data = sub_queue.get()
-        slave = Process(target=slave_service, args=(data, pub_queue))
+        slave = Process(target=slave_service, args=(func, data, pub_queue))
         slave.daemon = True
         slave.start()
 
 
 
 class TwinsTalk_Server():
-    def __init__(self, config):
+    def __init__(self, config, func):
         self.pub_config = config["pub_config"]
         self.sub_config = config["sub_config"]
+        self.pub_topics = list(config["pub_config"]["topic_config"]["topic_info"].keys())
+        self.sub_topics = list(config["sub_config"]["topic_config"]["topic_info"].keys())
+        self.func = func
 
     def run(self):
         # manager = Manager()
@@ -121,7 +124,7 @@ class TwinsTalk_Server():
         pub_process = Process(target=start_publisher,
                               args=(self.pub_config, pub_queue,))
         service_process = Process(target=start_service, args=(
-            self.pub_config, self.sub_config, sub_queue, pub_queue))
+            self.func, sub_queue, pub_queue))
 
         sub_process.start()
         service_process.start()

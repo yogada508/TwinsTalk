@@ -50,11 +50,26 @@ config = {
 }
 
 
+# User defined fuction
+# The return value must contain all of the pub_topic's data
+def myfunc(client_data):
+    '''
+    Args: 
+        client_data: A dictionary that keeps the data of sub_topic
+                    use client_data["topic_name"] to access data
+    Returns:
+        result_data: A dictionary that keeps the data of pub_topic
+    '''
+    
+    video_name = client_data["videoName"]
+    video_data = client_data["videoData"]
 
-def main():
-    tt_server = TwinsTalk_Server(config)
-    tt_server.run()
+    result_data = {
+        "annotation": video_name + "_result"
+    }
 
+    return result_data
 
 if __name__ == '__main__':
-    main()
+    tt_server = TwinsTalk_Server(config, myfunc)
+    tt_server.run()
