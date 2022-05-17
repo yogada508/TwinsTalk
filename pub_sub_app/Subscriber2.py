@@ -96,7 +96,6 @@ class Subscriber():
         self.subscriber = {}
         self.subscribe_topic()
 
-        print("star process!")
         if self.subcribe_mode == 0:
             self.serverProcess = GRPC_ServerProcess(
                 self.node, self.subcribe_port, self.topics_buffer, 1)
@@ -107,7 +106,6 @@ class Subscriber():
             self.thread = multiprocessing.Process(target=self.run)
         self.thread.start()
 
-        print('Start Subscriber'.format())
         time.sleep(5)
 
     def subscribe_topic(self):
@@ -249,7 +247,7 @@ class Subscriber():
 
     def run(self):
         th_timer = 0
-        print("Subscriber run")
+        print(f"[Success] Subscriber run process {self.node.node_id} is started.")
         try:
             with grpc.insecure_channel('{}:{}'.format(self.node.server_ip, self.node.server_port)) as channel:
 

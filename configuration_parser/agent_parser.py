@@ -1,10 +1,8 @@
+import sys
+sys.path.append("..")
 import json
 import socket
-
-CONTROLLER_IP = "140.113.193.15"
-CONTROLLER_PORT = "55555"
-AGENT_IP = "140.113.193.15"
-
+from config import CONTROLLER_IP, CONTROLLER_PORT, AGENT_IP
 
 class Agent_Parser():
     def __init__(self, config):

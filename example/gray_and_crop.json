@@ -1,6 +1,6 @@
 {
     "client_name": "01.updrsClient",
-    "service": "UPDRS_example",
+    "service": "simple_demo",
     "input": [
         {
             "topic_name": "videoName",
@@ -13,13 +13,13 @@
     ],
     "output": [
         {
-            "topic_name": "annotation",
-            "data_type": "str"
+            "topic_name": "croppedVideo",
+            "data_type": "bytes"
         }
     ],
     "node":[
         {
-            "calculator": "mediapipe",
+            "calculator": "gray",
             "input": [
                 {
                     "topic_name": "videoName",
@@ -32,8 +32,8 @@
             ],
             "output": [
                 {
-                    "topic_name": "annotation",
-                    "data_type": "str"
+                    "topic_name": "grayVideo",
+                    "data_type": "bytes"
                 }
             ]
         },

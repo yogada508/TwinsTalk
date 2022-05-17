@@ -1,10 +1,14 @@
+import sys
+sys.path.append("..")
+
 from twinstalk_api.twinstalk_client import TwinsTalk_Client
 import json
+import sys
 import time
 
 
 def main():
-    with open("test_config.json") as f:
+    with open("gray_and_crop.json") as f:
         configuration = json.load(f)
 
     tt_client = TwinsTalk_Client(configuration)
@@ -12,19 +16,20 @@ def main():
 
     i = 0
 
-    file = open("two-hands_edited.mp4", "rb")
+    file = open("input_video.mp4", "rb")
     data = file.read()
 
     print("send time: ", time.time())
-    tt_client.pub.data_writer('videoName', "two-hands_edited.mp4")
+    tt_client.pub.data_writer('videoName', "input_video.mp4")
     tt_client.pub.data_writer('videoData', data)
     print("end, len of file", len(data))
 
     while True:
         tt_client.sub.updata_data()
-        skeleton = tt_client.sub.read_topic('annotation')
-        if skeleton is not None:
-            print(skeleton)
+        proto = tt_client.sub.read_topic('croppedVideo')
+        if proto is not None:
+            with open("helloworld.mp4", "wb") as f:
+                f.write(proto.data)
             print("receive time: ", time.time())
             break
 

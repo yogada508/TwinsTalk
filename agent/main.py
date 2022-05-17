@@ -1,6 +1,10 @@
+import sys
+sys.path.append("..")
+
 from pub_sub_app import node_api2 as node_api
 from pub_sub_app import Subscriber2 as Subscriber
 from configuration_parser.agent_parser import Agent_Parser as Parser
+from config import CONTROLLER_IP, CONTROLLER_PORT, AGENT_IP, CONFIGURATION_PORT
 
 import grpc
 import json
@@ -8,12 +12,6 @@ import threading
 from multiprocessing import Process
 import agent
 import time
-
-CONTROLLER_IP = "140.113.193.15"
-CONTROLLER_PORT = 55555
-
-AGENT_IP = "140.113.193.15"
-CONFIG_PORT = 54321
 
 # to listening configuration file
 sub_config = {
@@ -30,7 +28,7 @@ sub_config = {
         },
         "mode": 0,
         "ip": AGENT_IP,
-        "port": CONFIG_PORT
+        "port": CONFIGURATION_PORT
     }
 }
 

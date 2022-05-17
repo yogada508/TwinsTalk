@@ -1,18 +1,24 @@
+import sys
+sys.path.append("..")
+
 from twinstalk_api.twinstalk_server import TwinsTalk_Server
+from pub_sub_app import node_api2 as node_api
+from pub_sub_app import Publisher2 as Publisher
+from config import CONTROLLER_IP, CONTROLLER_PORT, AGENT_IP
+import time
 
-CONTROLLER_IP = "140.113.193.15"
-CONTROLLER_PORT = 55555
+from services.gray import gray
 
-SERVER_IP = "140.113.28.159"
-PUB_PORT = 54321
-SUB_PORT = 12345
+SERVER_IP = "140.113.28.158"
+PUB_PORT = 12345
+SUB_PORT = 12346
 
 pub_config = {
     "node_config": {
         "server_ip": CONTROLLER_IP,
         "server_port": CONTROLLER_PORT,
-        "node_id": "pub/server/mediapipe",
-        "node_name": "pub/server/mediapipe",
+        "node_id": "pub/server/gray",
+        "node_name": "pub/server/gray",
         "node_domain": "domain1"
     },
     "topic_config": {
@@ -20,7 +26,7 @@ pub_config = {
         "ip": SERVER_IP,
         "port": PUB_PORT,
         "topic_info": {
-            "annotation": "str"
+            "grayVideo": "bytes"
         }
     }
 }
@@ -29,8 +35,8 @@ sub_config = {
     "node_config": {
         "server_ip": CONTROLLER_IP,
         "server_port": CONTROLLER_PORT,
-        "node_id": "sub/server/mediapipe",
-        "node_name": "sub/server/mediapipe",
+        "node_id": "sub/server/gray",
+        "node_name": "sub/server/gray",
         "node_domain": "domain1"
     },
     "topic_config": {
@@ -63,9 +69,13 @@ def myfunc(client_data):
     
     video_name = client_data["videoName"]
     video_data = client_data["videoData"]
+    
+    print(f"[INFO] gray_server got videoName={video_name} & videoData size = {sys.getsizeof(video_data)}", )
+
+    gray_video = gray(video_name, video_data)
 
     result_data = {
-        "annotation": video_name + "_result"
+        "grayVideo": gray_video
     }
 
     return result_data
@@ -73,3 +83,8 @@ def myfunc(client_data):
 if __name__ == '__main__':
     tt_server = TwinsTalk_Server(config, myfunc)
     tt_server.run()
+
+    # pub_node = node_api.Node(config["pub_config"]["node_config"])
+    # pub = Publisher.Publisher(pub_node, config["pub_config"]["topic_config"])
+    # while True:
+    #     time.sleep(1)
