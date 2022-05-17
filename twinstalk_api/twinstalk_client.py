@@ -1,6 +1,6 @@
 '''
 
-TwinsTalk Cleint
+TwinsTalk Client
 1. Start publisher and subscriber node
 2. Add configuration connection
 3. Wait connection complete
@@ -12,38 +12,34 @@ TwinsTalk Cleint
 '''
 
 import time
-from pub_sub_app import node_api2 as node_api
+from pub_sub_app import node_api2 as node_api, node_pb2_grpc, node_pb2
 from pub_sub_app import Publisher2 as Publisher
 from pub_sub_app import Subscriber2 as Subscriber
 from configuration_parser.client_parser import Client_Parser as Parser
+from config import CONTROLLER_IP, CONTROLLER_PORT
+
 import threading
+import grpc
 import json
 import sys
 
+ignore_topic = {"configuration"}
 
 class TwinsTalk_Client:
-    def __init__(self, configuration):
+    def __init__(self, configuration, interval = 40):
         self.configuration = configuration
+        self.interval = interval
 
         config = Parser(configuration).result
         self.pub_config = config["pub_config"]
         self.sub_config = config["sub_config"]
         self.connection = config["connection"]
+        self.server_list = config["server_list"]
 
         self.pub_node_id = config["pub_config"]["node_config"]["node_id"]
         self.sub_node_id = config["sub_config"]["node_config"]["node_id"]
 
         self.stop_flag = threading.Event()
-
-    def _wait_configuration_connection(self):
-        print("Waiting for 'configuration' connection...")
-
-        pub_topic_name = self.connection["pub_topic_name"]
-        sub_topic_name = self.connection["sub_topic_name"]
-        while not self.stop_flag.wait(0.5):
-            if self.pub.has_connection(pub_topic_name, sub_topic_name):
-                print(f"Connected: {pub_topic_name} and {sub_topic_name}")
-                return
 
     def _wait_agent_environment_setting(self):
         print("Waiting agent environment setting......")
@@ -55,25 +51,18 @@ class TwinsTalk_Client:
         while not self.stop_flag.wait(0.5):
             ready = True
             for topic in topic_dict.keys():
-                if topic == "configuration":
+                if topic in ignore_topic:
                     continue
 
                 pub_topic_name = f"{pub_node_id}:{topic}"
                 sub_topic_name = f"{sub_node_id}:{topic}_I"
                 if not self.pub.has_connection(pub_topic_name, sub_topic_name):
                     ready = False
-                    # print(f"Not Connected: '{pub_topic_name}' and '{sub_topic_name}'")
                     break
-                # else:
-                #     print(f"Connected: '{pub_topic_name}' -> '{sub_topic_name}'")
 
             if ready:
                 print("All of Connections are ready!")
                 return True
-            # else:
-            #     print("Some connections haven't been established.")
-            #     print("Rechecking...")
-            #     print("---")
 
     def _init_client_environment(self):
         print("Initializing client environment....")
@@ -107,8 +96,6 @@ class TwinsTalk_Client:
                 f"Add Connection Failed: 'pub/client/configuration' -> 'sub/agent/configuration'")
             sys.exit()
 
-        self._wait_configuration_connection()
-
         print("Publish configuration to agent:", self.configuration)
         self.pub.data_writer("configuration", json.dumps(self.configuration))
 
@@ -119,8 +106,38 @@ class TwinsTalk_Client:
 
         print("----------------------------------")
 
+    def _check_server_alive(self):
+        print("Checking server status......")
+
+        channel = grpc.insecure_channel('{}:{}'.format(CONTROLLER_IP, CONTROLLER_PORT))
+        server_stub = node_pb2_grpc.ControlStub(channel)
+
+        all_alive = True
+        for node_id in self.server_list:
+            node = node_pb2.Node(node_id = node_id)
+            response = server_stub.CheckNodeStatus(node)
+            if not response.isAlive: 
+                all_alive = False
+                print(f"Server: {node_id} is currently offline.")
+            else:
+                print(f"Server: {node_id} is available.")
+
+        if not all_alive:
+            print("The program will end because some servers are currently unavailable.")
+            sys.exit()
+        
+        print("----------------------------------")
+    
+    def terminate(self):
+        self.pub.terminate()
+        self.sub.terminate()
+
     def run(self):
+        self._check_server_alive()
         self._init_client_environment()
         self._init_agent_environment()
 
         print("Environment is ready.")
+
+        timer = threading.Timer(self.interval, self.terminate)
+        timer.start()

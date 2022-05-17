@@ -117,6 +117,7 @@ class ControlServicer(node_pb2_grpc.ControlServicer):
         return node_pb2.Empty()
 
     def UpdateTopicState(self, request: node_pb2.Topic, context) -> node_pb2.TopicAlive:
+        print(f"UpdateTopicState")
         try:
             topic_alive = node_pb2.TopicAlive()
 
@@ -138,6 +139,7 @@ class ControlServicer(node_pb2_grpc.ControlServicer):
             return topic_alive
 
         except Exception as e:
+            print(e)
             context.set_code(grpc.StatusCode.NOT_FOUND)
             context.set_details(str(e))
             return node_pb2.TopicAlive(isAlive=True)

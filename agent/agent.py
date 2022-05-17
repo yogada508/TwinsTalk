@@ -1,3 +1,5 @@
+import sys 
+sys.path.append("..")
 from pub_sub_app import node_api2 as node_api
 from pub_sub_app import Publisher2 as Publisher
 from pub_sub_app import Subscriber2 as Subscriber
@@ -146,12 +148,14 @@ class Agent():
                 for pub_topic, sub_topic in self.pub_to_server_table.items():
                     proto_data = self.sub.read_topic(sub_topic)
                     if proto_data is not None:
+                        print(f"pub to server {pub_topic}")
                         self.pub_to_server.data_writer(
                             pub_topic, proto_data.data)
 
                 for pub_topic, sub_topic in self.pub_to_client_table.items():
                     proto_data = self.sub.read_topic(sub_topic)
                     if proto_data is not None:
+                        print(f"pub to client {pub_topic}")
                         self.pub_to_client.data_writer(
                             pub_topic, proto_data.data)
 

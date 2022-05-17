@@ -9,7 +9,7 @@ MICRO = 1000000
 class PubSubServiceServicer(pubsub_pb2_grpc.PubSubServiceServicer):
 
     def __init__(self,node,topics_buffer, buffer_maxLen=20):
-        print("enable PubSubServiceServicer")
+        # print("enable PubSubServiceServicer")
         self.node = node
         self.topics_buffer = topics_buffer
         #self.connected_topic=connected_topic

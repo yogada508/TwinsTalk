@@ -440,7 +440,7 @@ class Publisher():
             print("terminate publisher failed", e)
 
     def run(self, parent_pid):
-        print(f"Publisher {self.node.node_id} started!")
+        print(f"[Success] Publisher run process {self.node.node_id} is started.")
         self.parent_pid = parent_pid
 
         try:

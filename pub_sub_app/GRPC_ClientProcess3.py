@@ -378,7 +378,7 @@ class GRPC_ClientProcess3:
         average_time = 0
         # calculate fps
         self.prev_timestamp = 0
-        print("start GRPC client Process")
+        print(f"[Success] gRPC Client process {self.node_id} is started.")
 
         self.start_time = time.time()
         count = 0

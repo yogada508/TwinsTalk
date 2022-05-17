@@ -1,10 +1,8 @@
+import sys
+sys.path.append("..")
 import json
 import socket
-
-CONTROLLER_IP = "140.113.193.15"
-CONTROLLER_PORT = "55555"
-CLIENT_IP = "127.0.0.1"
-
+from config import CONTROLLER_IP, CONTROLLER_PORT, CLIENT_IP
 
 class Client_Parser():
     def __init__(self, configuration):
@@ -27,12 +25,17 @@ class Client_Parser():
         idf = {}
         odf = {}
         connection = {}
+        server_list = [] # all servers that need to be checked for liveness
 
         for inp in self.configuration["input"]:
             odf[inp["topic_name"]] = inp["data_type"]
 
         for out in self.configuration["output"]:
             idf[out["topic_name"]] = out["data_type"]
+        
+        for node in self.configuration["node"]:
+            server_list.append(f"sub/server/{node['calculator']}")
+            server_list.append(f"pub/server/{node['calculator']}")
 
         # add configuration topic
         odf["configuration"] = "str"
@@ -83,5 +86,6 @@ class Client_Parser():
         self.result = {
             "pub_config": pub_config,
             "sub_config": sub_config,
-            "connection": connection
+            "connection": connection,
+            "server_list": server_list
         }

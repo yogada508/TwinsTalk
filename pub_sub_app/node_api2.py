@@ -16,7 +16,7 @@ import logging
 # import grpc protobuf
 #============================================================
 from concurrent import futures
-print(sys.path)
+# print(sys.path)
 import grpc
 import node_pb2
 import node_pb2_grpc
