@@ -8,7 +8,7 @@
 
 ![twinstalk_architecture](images/twinstalk_architecture.png)
 
-### User and Server interaction
+### Interaction between Client and Server
 
 User上傳的資料會透過Agent在各個Server之間傳遞，最終將結果回傳給Client。
 
