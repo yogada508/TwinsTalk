@@ -3,7 +3,6 @@ sys.path.append("..")
 
 from twinstalk_api.twinstalk_client import TwinsTalk_Client
 import json
-import sys
 import time
 
 
@@ -24,17 +23,20 @@ def main():
     tt_client.pub.data_writer('videoData', data)
     print("end, len of file", len(data))
 
+    output_file = "cropped_video.mp4"
+
     while True:
         tt_client.sub.updata_data()
         proto = tt_client.sub.read_topic('croppedVideo')
         if proto is not None:
-            with open("helloworld.mp4", "wb") as f:
+            with open(output_file, "wb") as f:
                 f.write(proto.data)
             print("receive time: ", time.time())
             break
 
-    tt_client.sub.terminate()
-    tt_client.pub.terminate()
+    # tt_client.sub.terminate()
+    # tt_client.pub.terminate()
+    tt_client.terminate()
 
 
 if __name__ == '__main__':
