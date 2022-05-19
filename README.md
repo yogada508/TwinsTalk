@@ -286,7 +286,7 @@ python web_ui.py
 
 ---
 
-## Simeple demo steps:
+## Simple demo steps:
 
 1. 至`config.py`更改:
 ```
