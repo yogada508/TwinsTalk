@@ -31,6 +31,5 @@ def main():
     tt_client.sub.terminate()
     tt_client.pub.terminate()
 
-
 if __name__ == '__main__':
     main()

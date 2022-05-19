@@ -36,21 +36,6 @@
                     "data_type": "str"
                 }
             ]
-        },
-        {
-            "calculator": "crop",
-            "input": [
-                {
-                    "topic_name": "grayVideo",
-                    "data_type": "bytes"
-                }
-            ],
-            "output": [
-                {
-                    "topic_name": "croppedVideo",
-                    "data_type": "bytes"
-                }
-            ]
         }
     ]
 }

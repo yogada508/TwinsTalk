@@ -26,8 +26,9 @@ import sys
 ignore_topic = {"configuration"}
 
 class TwinsTalk_Client:
-    def __init__(self, configuration, interval = 40):
+    def __init__(self, configuration, is_streaming = False, interval = 40):
         self.configuration = configuration
+        self.is_streaming = is_streaming
         self.interval = interval
 
         config = Parser(configuration).result
@@ -139,5 +140,6 @@ class TwinsTalk_Client:
 
         print("Environment is ready.")
 
-        timer = threading.Timer(self.interval, self.terminate)
-        timer.start()
+        if self.is_streaming:
+            timer = threading.Timer(self.interval, self.terminate)
+            timer.start()

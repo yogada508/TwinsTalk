@@ -32,7 +32,6 @@ sub_config = {
     }
 }
 
-
 def start_config_sub():
     node = node_api.Node(sub_config["node_config"])
     sub = Subscriber.Subscriber(node, sub_config["topic_config"])
@@ -78,19 +77,3 @@ def main():
 
 if __name__ == '__main__':
     main()
-
-    # RequestAddConnection = node_pb2.RequestAddConnection(pub_node_id=pub_node_id, sub_node_id=sub_node_id, pub_topic_name=pub_topic_name, sub_topic_name=sub_topic_name, topic_type=topic_type)
-
-    # connection_id = None
-    # with grpc.insecure_channel(SERVER_ADDRESS) as channel:
-    #     stub = node_pb2_grpc.ControlStub(channel)
-    #     response = stub.AddConnection(RequestAddConnection)
-    #     # time.sleep(2)
-    #     connection_id = response.connection_id
-    #     print(connection_id)
-
-    # if connection_id:
-    #     RequestDelConnection = node_pb2.RequestDelConnection(connection_id = str(connection_id))
-    #     with grpc.insecure_channel(SERVER_ADDRESS) as channel:
-    #         stub = node_pb2_grpc.ControlStub(channel)
-    #         stub.DeleteConnection(RequestDelConnection)

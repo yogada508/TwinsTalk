@@ -1,5 +1,5 @@
 {
-    "client_name": "01.updrsClient",
+    "client_name": "01.demoClient",
     "service": "simple_demo",
     "input": [
         {
