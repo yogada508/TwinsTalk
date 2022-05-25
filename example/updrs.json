@@ -1,0 +1,72 @@
+{
+    "client_name": "01.updrsClient",
+    "service": "UPDRS_example",
+    "input": [
+        {
+            "topic_name": "videoName",
+            "data_type": "str"
+        },
+        {
+            "topic_name": "videoData",
+            "data_type": "bytes"
+        }
+    ],
+    "output": [
+        {
+            "topic_name": "renderedVideo",
+            "data_type": "bytes"
+        },
+        {
+            "topic_name": "graspResult",
+            "data_type": "str"
+        }
+    ],
+    "node":[
+        {
+            "calculator": "mediapipe",
+            "input": [
+                {
+                    "topic_name": "videoName",
+                    "data_type": "str"
+                },
+                {
+                    "topic_name": "videoData",
+                    "data_type": "bytes"
+                }
+            ],
+            "output": [
+                {
+                    "topic_name": "annotation",
+                    "data_type": "bytes"
+                }
+            ]
+        },
+        {
+            "calculator": "render",
+            "input": [
+                {
+                    "topic_name": "videoName",
+                    "data_type": "str"
+                },
+                {
+                    "topic_name": "videoData",
+                    "data_type": "bytes"
+                },
+                {
+                    "topic_name": "annotation",
+                    "data_type": "bytes"
+                }
+            ],
+            "output": [
+                {
+                    "topic_name": "renderedVideo",
+                    "data_type": "bytes"
+                },
+                {
+                    "topic_name": "graspResult",
+                    "data_type": "str"
+                }
+            ]
+        }
+    ]
+}

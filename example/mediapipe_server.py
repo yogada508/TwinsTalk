@@ -1,7 +1,11 @@
+import sys
+sys.path.append("..")
+
 from twinstalk_api.twinstalk_server import TwinsTalk_Server
 from config import CONTROLLER_IP, CONTROLLER_PORT
 import json
-from UPDRS.mediapipe_hand import hand_detection
+from example.services.mediapipe_hand import hand_detection
+import time
 
 SERVER_IP = "140.113.28.159"
 PUB_PORT = 54321
@@ -61,6 +65,8 @@ def myfunc(client_data):
         result_data: A dictionary that keeps the data of pub_topic
     '''
 
+    start_time = time.time()
+
     # save video
     video_name = client_data["videoName"]
     with open(video_name, "wb") as f:
@@ -81,6 +87,8 @@ def myfunc(client_data):
     result_data = {
         "annotation": json.dumps(data).encode("utf-8")
     }
+
+    print(f"calculation time: {time.time()-start_time:.4f}")
 
     return result_data
 

@@ -1,7 +1,11 @@
+import sys
+sys.path.append("..")
+
 from twinstalk_api.twinstalk_server import TwinsTalk_Server
 from config import CONTROLLER_IP, CONTROLLER_PORT
 import json
-from UPDRS.grasp_cal import render_video, find_peak
+from example.services.grasp_cal import find_peak, render_video
+import time
 
 SERVER_IP = "140.113.28.159"
 PUB_PORT = 54322
@@ -63,6 +67,8 @@ def myfunc(client_data):
         result_data: A dictionary that keeps the data of pub_topic
     '''
 
+    start_time = time.time()
+
     # save video
     video_name = client_data["videoName"]
     with open(video_name, "wb") as f:
@@ -81,6 +87,8 @@ def myfunc(client_data):
         "renderedVideo": rendered_video,
         "graspResult": grasp_result
     }
+
+    print(f"calculation time: {time.time()-start_time:.4f}")
 
     return result_data
 
