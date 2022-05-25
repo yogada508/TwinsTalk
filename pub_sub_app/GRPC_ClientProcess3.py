@@ -11,6 +11,7 @@ import threading
 import multiprocessing
 import collections
 import os
+import copy
 
 # ============================================================
 # import grpc protobuf
@@ -293,7 +294,7 @@ class GRPC_ClientProcess3:
                 conn["client_mode"] = 0
                 conn["src_topic"] = topic
                 conn["dst_topic"] = info["topic_name"]
-                messages = topics_buffer[topic]
+                messages = copy.deepcopy(topics_buffer[topic])
                 # print("messages",messages)
                 for message in messages:
                     message.topic_name = info["topic_name"]
@@ -313,7 +314,8 @@ class GRPC_ClientProcess3:
 
             # create new stub when the new address appear.
             if addr not in self.connected_stub.keys():
-                channel = grpc.insecure_channel(addr)
+                options = [('grpc.max_send_message_length', LargeDataSize), ('grpc.max_receive_message_length', LargeDataSize)]
+                channel = grpc.insecure_channel(addr, options=options)
                 stub = pubsub_pb2_grpc.PubSubServiceStub(channel)
                 self.connected_stub[addr] = stub
             
@@ -363,8 +365,8 @@ class GRPC_ClientProcess3:
             for res in responses:
                 if not res.data:
                     continue
-                print("rec delay time:", len(res.data), res.node_id,
-                      res.topic_name, res.topic_name, time.time()-res.timestamp/MICRO)
+                # print("rec delay time:", len(res.data), res.node_id,
+                #       res.topic_name, res.topic_name, time.time()-res.timestamp/MICRO)
                 res_list.append((info, res))
             # print(f'time:{time.time()} ,pid:{os.getpid()}, res"{res_list}')
             return res_list
@@ -401,8 +403,8 @@ class GRPC_ClientProcess3:
                             # print(response)
                             if self.client_mode == 1:
                                 for info, res in response:
-                                    print("delay time:", len(
-                                        res.data), res.node_id, res.topic_name, res.topic_name, time.time()-res.timestamp/MICRO)
+                                    # print("delay time:", len(
+                                    #     res.data), res.node_id, res.topic_name, res.topic_name, time.time()-res.timestamp/MICRO)
                                     self.write_data(
                                         res, info['src_topic'], info["topic_type"])
 
