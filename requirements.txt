@@ -1,0 +1,5 @@
+grpcio==1.47.0
+protobuf==3.20
+numpy==1.23.1
+flask==2.2.0
+opencv-python==4.6.0.66

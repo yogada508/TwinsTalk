@@ -288,7 +288,14 @@ python web_ui.py
 
 ## Simple demo steps:
 
-1. 至`config.py`更改:
+> python版本為3.8
+
+1. 安裝dependency
+```
+pip install -r requirements.txt
+```
+
+2. 至`config.py`更改:
 ```
 ...
 
@@ -299,48 +306,48 @@ AGENT_IP = "YOUR_IP
 ...
 ```
 
-2. 至`example/gray_and_crop/yc_gray_server.py`更改`SERVER_IP` (Line 12)
+3. 至`example/gray_and_crop/yc_gray_server.py`更改`SERVER_IP` (Line 12)
 ```
 ...
 SERVER_IP = "YOUR_IP"
 ...
 ```
 
-3. 至`example/gray_and_crop/yc_crop_server.py`更改`SERVER_IP` (Line 12)
+4. 至`example/gray_and_crop/yc_crop_server.py`更改`SERVER_IP` (Line 12)
 ```
 ...
 SERVER_IP = "YOUR_IP"
 ...
 ```
 
-4. 啟動controller
+5. 啟動controller
 ```
 cd pub_sub_platform
 python controller.py
 ```
 
-5. 啟動agent（開新terminal）
+6. 啟動agent（開新terminal）
 ```
 cd agent
 python main.py
 ```
 
-6. 啟動gray server（開新terminal)
+7. 啟動gray server（開新terminal)
 ```
 cd example/gray_and_crop
 python yc_gray_server.py
 ```
 
-7. 啟動crop server（開新terminal）
+8. 啟動crop server（開新terminal）
 ```
 cd example/gray_and_crop
 python yc_crop_server.py
 ```
 
-8. 執行client（開新terminal）
+9. 執行client（開新terminal）
 ```
 cd example/gray_and_crop
 python yc_client.py
 ```
 
-9. 結果將儲存為`cropped_video.mp4`
+10. 結果將儲存為`cropped_video.mp4`
