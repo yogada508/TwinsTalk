@@ -107,8 +107,8 @@ Configuration file為使用者定義的資料傳輸流程，以JSON格式撰寫�
 以下步驟為Client使用TwinsTalk的流程與sample code。
 
 1. 定義**Configuration file**
-2. 檢查所需要的service是否可提供服務
-3. 撰寫程式碼，以下為程式流程：
+2. 檢查所需要的service是否已啟動
+3. 撰寫Client端的程式碼，以下為程式流程：
     * 引用`TwinsTalk_Client`類別
     * 讀取**configuration file**
     * 將**configuration**傳入`TwinsTalk_Client`，並呼叫函式`run`，啟動client
@@ -291,36 +291,56 @@ python web_ui.py
 1. 至`config.py`更改:
 ```
 ...
+
 CONTROLLER_IP = "YOUR_IP"
 CONTROLLER_PORT = "YOUR_PORT"
 AGENT_IP = "YOUR_IP
+
 ...
 ```
 
-2. 啟動controller
+2. 至`example/gray_and_crop/yc_gray_server.py`更改`SERVER_IP` (Line 12)
+```
+...
+SERVER_IP = "YOUR_IP"
+...
+```
+
+3. 至`example/gray_and_crop/yc_crop_server.py`更改`SERVER_IP` (Line 12)
+```
+...
+SERVER_IP = "YOUR_IP"
+...
+```
+
+4. 啟動controller
 ```
 cd pub_sub_platform
 python controller.py
 ```
 
-3. 啟動agent（開新terminal）
+5. 啟動agent（開新terminal）
 ```
 cd agent
 python main.py
 ```
 
-4. 啟動gray server與crop server（開新terminal）
+6. 啟動gray server（開新terminal)
 ```
-cd examples
+cd example/gray_and_crop
 python yc_gray_server.py
-(開新terminal)
+```
+
+7. 啟動crop server（開新terminal）
+```
+cd example/gray_and_crop
 python yc_crop_server.py
 ```
 
-5. 執行client（開新terminal）
+8. 執行client（開新terminal）
 ```
-cd example
+cd example/gray_and_crop
 python yc_client.py
 ```
 
-6. 結果將儲存為`cropped_video.mp4`
+9. 結果將儲存為`cropped_video.mp4`

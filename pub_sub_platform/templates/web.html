@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <title>Hello Page</title>
+        <script src="{{ url_for('static', filename='js/jquery-3.4.1.slim.min.js') }}"></script>
+        <script src="{{ url_for('static', filename='js/popper.min.js') }}"></script>
+        
+        <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.min.css') }}">
+        <script src="{{ url_for('static', filename='js/bootstrap.min.js') }}"></script>
+    </head>
+
+    <body>
+        <br>
+        <div class="container">
+            <h1>
+                <small class="text-muted">
+                    <a href="{{ url_for('connection') }}"><button>&#x21bb;</button></a>
+                </small>
+            </h1>
+        </div>
+
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col">
+                    <h2>Nodes</h2>
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th scope="col">NodeID</th>
+                                <th scope="col">NodeName</th>
+                                <th scope="col">NodeDomain</th>
+                                <th scope="col">UpdateTime</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        {% for node in nodes %}
+                            <tr>
+                                <td>{{node[0]}}</th>
+                                <td>{{node[1]}}</th>
+                                <td>{{node[2]}}</th>
+                                <td>{{time_format(node[3])}}</th>
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                <div class="col">
+                    <h2>Topics</h2>
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th scope="col">TopicName</th>
+                                <th scope="col">TopicType</th>
+                                <th scope="col">NodeID</th>
+                                <th scope="col">UpdateTime</th>
+                                <th scope="col">TopicMode</th>
+                                <th scope="col">TopicIP</th>
+                                <th scope="col">TopicPort</th>
+                                
+                                
+                            </tr>
+                        </thead>
+                        <tbody>
+                        {% for topic in topics %}
+                            <tr>
+                                <td>{{topic[0]}}</th>
+                                <td>{{topic[1]}}</th>
+                                <td>{{topic[2]}}</th>
+                                <td>{{time_format(topic[3])}}</th>
+                                <td>{{topic[4]}}</th>
+                                <td>{{topic[5]}}</th>
+                                <td>{{topic[6]}}</th>
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                <div class="col">
+                    <h2>Subscribe Topics</h2>
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th scope="col">SubscribeID</th>
+                                <th scope="col">TopicName</th>
+                                <th scope="col">TopicType</th>
+                                <th scope="col">NodeID</th>
+                                <th scope="col">UpdateTime</th>
+                                <th scope="col">TopicMode</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        {% for subscribe_topic in subscribe_topics %}
+                            <tr>
+                                <td>{{subscribe_topic[0]}}</th>
+                                <td>{{subscribe_topic[1]}}</th>
+                                <td>{{subscribe_topic[2]}}</th>
+                                <td>{{subscribe_topic[3]}}</th>
+                                <td>{{time_format(subscribe_topic[4])}}</th>
+                                <td>{{subscribe_topic[5]}}</th>
+                                
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div class="container">
+            <form class="form-inline" action = "{{server}}/add" method="POST">
+                <label class="mr-sm-2" for="PubTopicName">PubTopicName</label>
+                <select class="custom-select mr-sm-2" id="PubTopicName" name="PubTopicName">
+                    {% for topic_name in pub_topics_name %}
+                        <option>{{topic_name}}</option>
+                    {% endfor %}
+                </select>
+                <label class="mr-sm-2" for="SubTopicName">SubTopicName</label>
+                <select class="custom-select mr-sm-2" id="SubTopicName" name="SubTopicName">
+                    {% for topic_name in sub_topics_name %}
+                        <option>{{topic_name}}</option>
+                    {% endfor %}
+                </select>
+                <label class="mr-sm-2" for="TopicType">TopicType</label>
+                <select class="custom-select mr-sm-2" id="TopicType" name="TopicType">
+                    {% for topic_type in topics_type %}
+                        <option>{{topic_type}}</option>
+                    {% endfor %}
+                </select>
+                <label class="mr-sm-2" for="PubNodeID">PubNodeID</label>
+                <select class="custom-select mr-sm-2" id="PubNodeID" name="PubNodeID">
+                    {% for pub_node in pub_nodes %}
+                        <option>{{pub_node}}</option>
+                    {% endfor %}
+                </select>
+                <label class="mr-sm-2" for="SubNodeID">SubNodeID</label>
+                <select class="custom-select mr-sm-2" id="SubNodeID" name="SubNodeID">
+                    {% for sub_node in sub_nodes %}
+                    <option>{{sub_node}}</option>
+                    {% endfor %}
+                </select>
+
+                <div class="col-auto my-1">
+                    <button type="submit" class="btn btn-primary">Submit</button>
+                </div>
+            </form>
+        </div>
+
+        <div class="container">
+            <form class="form-inline" action = "{{server}}/delete" method="POST">
+                
+                <table class="table table-hover">
+                    <thead>
+                    <tr>
+                        <th scope="col">ConnectID</th>
+                        <th scope="col">PubTopicName</th>
+                        <th scope="col">SubTopicName</th>
+                        <th scope="col">TopicType</th>
+                        <th scope="col">PubNodeID</th>
+                        <th scope="col">SubNodeID</th>
+                        <th scope="col">ConnectionMode</th>
+                        <th scope="col">IsConnect</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for connection_info in connections_info %}
+                        <tr>
+                            <td scope="row">
+                                <div class="custom-control custom-checkbox">
+                                    <input type="checkbox" class="custom-control-input" id="connect-id-{{connection_info['ConnectID']}}" name="connect-id" value="{{connection_info['ConnectID']}}">
+                                    <label class="custom-control-label" for="connect-id-{{connection_info['ConnectID']}}">{{connection_info['ConnectID']}}</label>
+                                </div>
+                            </td>
+                            <td>{{connection_info['PubTopicName']}}</th>
+                            <td>{{connection_info['SubTopicName']}}</th>
+                            <td>{{connection_info['TopicType']}}</th>
+                            <td>{{connection_info['PubNodeID']}}</th>
+                            <td>{{connection_info['SubNodeID']}}</th>
+                            <td>{{connection_info['ConnectionMode']}}</th>    
+                            <td>{{connection_info['IsConnect']}}</th>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+                
+                <div class="col-auto my-1">
+                    <button type="submit" class="btn btn-primary">Delete</button>
+                </div>
+            </form>
+        </div>
+    </body>
+</html>

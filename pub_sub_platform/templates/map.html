@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <title>Cytoscape Page</title>
+        <script src="{{ url_for('static', filename='js/cytoscape.min.js') }}"></script>
+        
+        <script src="{{ url_for('static', filename='js/jquery-3.4.1.slim.min.js') }}"></script>
+        <script src="{{ url_for('static', filename='js/popper.min.js') }}"></script>
+        
+        <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.min.css') }}">
+        <script src="{{ url_for('static', filename='js/bootstrap.min.js') }}"></script>
+        
+        <script>
+            setTimeout(function(){
+                window.location.reload(1);
+            }, 5000);
+        </script>
+    
+    </head>
+    <style>
+        #cy {
+            width: 100%;
+            height: 100%;
+            position: absolute;
+        }
+    </style>
+    <body>
+        <div id="cy"></div>
+        <div class="container" id='nodes'>
+            
+        </div>
+
+        <script>
+            
+            // NodeID, NodeName, NodeDomain, UpdateTime
+            var nodes = JSON.parse('{{ nodes | tojson | safe }}');
+            // TopicName, TopicType, TopicIP, TopicPort, NodeID, UpdateTime
+            var topics = JSON.parse('{{ topics | tojson | safe }}');
+            // SubscribeID, TopicName, TopicType, NodeID, UpdateTime
+            var subscribe_topics = JSON.parse('{{ subscribe_topics | tojson | safe }}');
+            
+            // ConnectID, TopicName, TopicType, PubNodeID, SubNodeID, IsConnect
+            var connections_info = JSON.parse('{{ connections_info | tojson | safe }}');
+            
+            var cy = cytoscape({
+
+                // container to render in
+                container: $("#cy"),
+                elements: [
+                ],
+                style: [ // the stylesheet for the graph
+                    {
+                        selector: 'node[main]',
+                        style: {
+                            'label': 'data(label)'
+                        }
+                    },
+                    {
+                        selector: 'node[pub]',
+                        style: {
+                            'background-color': '#666',
+                            'label': 'data(label)'
+                        }
+                    },
+                    {
+                        selector: 'node[sub]',
+                        style: {
+                            'background-color': '#666',
+                            'label': 'data(label)'
+                        }
+                    },
+                    {
+                        selector: 'edge',
+                        style: {
+                            'width': 3,
+                            'line-color': '#666',
+                            'target-arrow-color': '#666',
+                            'curve-style': 'bezier',
+                            'target-arrow-shape': 'triangle'
+                        }
+                    }
+                ],
+                layout: {
+                    name: 'grid'
+                }
+            });
+
+            // add nodes
+            // NodeID, NodeName, NodeDomain, UpdateTime
+            for (var i = 0; i < nodes.length; i++) {
+                cy.add({
+                    group: 'nodes',
+                    data: {
+                        'id': nodes[i][0],
+                        'label': nodes[i][0],
+                        'main': null
+                    }
+                });
+
+                //$('#nodes').append('<p>' + nodes[i][0] + '</p>')
+            }
+            
+            // add topics
+            // TopicName, TopicType, TopicIP, TopicPort, NodeID, UpdateTime
+            for (var i = 0; i < topics.length; i++) {
+                cy.add({
+                    group: 'nodes',
+                    data: {
+                        // NodeID - TopicName
+                        'id': topics[i][4] + '-' + topics[i][0],
+                        'parent': topics[i][4],
+                        'type': topics[i][1],
+                        'label': topics[i][0] + ':' + topics[i][1],
+                        'pub': null
+                    }
+                });
+
+
+                //$('#nodes').append('<p>' + topics[i][4] + '-' + topics[i][0] + '</p>')
+            }
+
+            // add subscribe_topics
+            // SubscribeID, TopicName, TopicType, NodeID, UpdateTime
+            for (var i = 0; i < subscribe_topics.length; i++) {
+                cy.add({
+                    group: 'nodes',
+                    data: {
+                        // NodeID - TopicName
+                        'id': subscribe_topics[i][3] + '-' + subscribe_topics[i][1],
+                        'parent': subscribe_topics[i][3],
+                        'type': subscribe_topics[i][2],
+                        'label': subscribe_topics[i][1] + ':' + subscribe_topics[i][2],
+                        'sub': null
+                    }
+                });
+
+                //$('#nodes').append('<p>' + subscribe_topics[i][3] + '-' + subscribe_topics[i][1] + '</p>')
+            }
+
+            // add connections_info
+            // ConnectID, TopicName, TopicType, PubNodeID, SubNodeID, IsConnect
+            for (var i = 0; i < connections_info.length; i++) {
+                if (connections_info[i]['IsConnect'] == 1) {
+                    cy.add({
+                        group: 'edges',
+                        data: {
+                            'id': 'ConnectID-' + connections_info[i]['ConnectID'],
+                            'source': connections_info[i]['PubNodeID'] + '-' + connections_info[i]['TopicName'],
+                            'target': connections_info[i]['SubNodeID'] + '-' + connections_info[i]['TopicName']
+                        }
+                    });
+                    //$('#nodes').append('<p>' + 'ConnectID-' + connections_info[i]['ConnectID'] + '</p>')
+                }                
+            }
+
+            cy.layout({
+                name: 'circle',
+                padding: 5
+            }).run();
+        </script>
+    </body>
+</html>

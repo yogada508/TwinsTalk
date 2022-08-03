@@ -2,10 +2,10 @@ __pycache__
 img
 logs
 others
-flask
-static
-templates
+# flask
+# static
+# templates
 *.db
 client_video
 UPDRS
-*.mp4
+# *.mp4
