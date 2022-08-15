@@ -1,11 +1,14 @@
-from UPDRS.grasp_cal import render_video
+import sys
+sys.path.append("../..")
+
+from example.updrs.grasp_cal import render_video
 from twinstalk_api.twinstalk_client import TwinsTalk_Client
 import json
 import time
 
 
 def main():
-    with open("test_config.json") as f:
+    with open("updrs.json") as f:
         configuration = json.load(f)
 
     tt_client = TwinsTalk_Client(configuration, is_streaming=True, interval=40)
