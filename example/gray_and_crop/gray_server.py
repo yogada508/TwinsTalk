@@ -9,25 +9,34 @@ import time
 
 from gray_cal import gray
 
+# =========== configure this section ===========
 SERVER_IP = "140.113.28.158"
 PUB_PORT = 12345
 SUB_PORT = 12346
+PUB_SERVER_NAME = "pub/server/gray"
+SUB_SERVER_NAME = "sub/server/gray"
+PUB_TOPIC_INFO = {
+    "grayVideo": "bytes"
+}
+SUB_TOPIC_INFO = {
+    "videoName": "str",
+    "videoData": "bytes",
+}
+# ==============================================
 
 pub_config = {
     "node_config": {
         "server_ip": CONTROLLER_IP,
         "server_port": CONTROLLER_PORT,
-        "node_id": "pub/server/gray",
-        "node_name": "pub/server/gray",
+        "node_id": PUB_SERVER_NAME,
+        "node_name": PUB_SERVER_NAME,
         "node_domain": "domain1"
     },
     "topic_config": {
         "mode": 1,
         "ip": SERVER_IP,
         "port": PUB_PORT,
-        "topic_info": {
-            "grayVideo": "bytes"
-        }
+        "topic_info": PUB_TOPIC_INFO
     }
 }
 
@@ -35,18 +44,15 @@ sub_config = {
     "node_config": {
         "server_ip": CONTROLLER_IP,
         "server_port": CONTROLLER_PORT,
-        "node_id": "sub/server/gray",
-        "node_name": "sub/server/gray",
+        "node_id": SUB_SERVER_NAME,
+        "node_name": SUB_SERVER_NAME,
         "node_domain": "domain1"
     },
     "topic_config": {
         "mode": 0,
         "ip": SERVER_IP,
         "port": SUB_PORT,
-        "topic_info": {
-            "videoName": "str",
-            "videoData": "bytes",
-        }
+        "topic_info": SUB_TOPIC_INFO
     }
 }
 

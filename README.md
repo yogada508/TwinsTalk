@@ -1,5 +1,5 @@
 # HSCC - TwinsTalk
-##
+
 ## Architecture
 
 ### Overall
@@ -171,7 +171,7 @@ if __name__ == '__main__':
 
 ```python
 import sys
-sys.path.append("..")
+sys.path.append("../..")
 
 from twinstalk_api.twinstalk_server import TwinsTalk_Server
 from pub_sub_app import node_api2 as node_api
@@ -179,27 +179,36 @@ from pub_sub_app import Publisher2 as Publisher
 from config import CONTROLLER_IP, CONTROLLER_PORT, AGENT_IP
 import time
 
-from services.gray import gray
+from gray_cal import gray
 
+# =========== configure this section ===========
 SERVER_IP = "140.113.28.158"
 PUB_PORT = 12345
 SUB_PORT = 12346
+PUB_SERVER_NAME = "pub/server/gray"
+SUB_SERVER_NAME = "sub/server/gray"
+PUB_TOPIC_INFO = {
+    "grayVideo": "bytes"
+}
+SUB_TOPIC_INFO = {
+    "videoName": "str",
+    "videoData": "bytes",
+}
+# ==============================================
 
 pub_config = {
     "node_config": {
         "server_ip": CONTROLLER_IP,
         "server_port": CONTROLLER_PORT,
-        "node_id": "pub/server/gray",
-        "node_name": "pub/server/gray",
+        "node_id": PUB_SERVER_NAME,
+        "node_name": PUB_SERVER_NAME,
         "node_domain": "domain1"
     },
     "topic_config": {
         "mode": 1,
         "ip": SERVER_IP,
         "port": PUB_PORT,
-        "topic_info": {
-            "grayVideo": "bytes"
-        }
+        "topic_info": PUB_TOPIC_INFO
     }
 }
 
@@ -207,18 +216,15 @@ sub_config = {
     "node_config": {
         "server_ip": CONTROLLER_IP,
         "server_port": CONTROLLER_PORT,
-        "node_id": "sub/server/gray",
-        "node_name": "sub/server/gray",
+        "node_id": SUB_SERVER_NAME,
+        "node_name": SUB_SERVER_NAME,
         "node_domain": "domain1"
     },
     "topic_config": {
         "mode": 0,
         "ip": SERVER_IP,
         "port": SUB_PORT,
-        "topic_info": {
-            "videoName": "str",
-            "videoData": "bytes",
-        }
+        "topic_info": SUB_TOPIC_INFO
     }
 }
 
@@ -288,7 +294,7 @@ python web_ui.py
 
 ## Simple demo steps:
 
-> python版本為3.8
+> 環境：python 3.8, Ubuntu 20.04
 
 1. 安裝dependency
 ```
@@ -335,19 +341,19 @@ python main.py
 7. 啟動gray server（開新terminal)
 ```
 cd example/gray_and_crop
-python yc_gray_server.py
+python gray_server.py
 ```
 
 8. 啟動crop server（開新terminal）
 ```
 cd example/gray_and_crop
-python yc_crop_server.py
+python crop_server.py
 ```
 
 9. 執行client（開新terminal）
 ```
 cd example/gray_and_crop
-python yc_client.py
+python client.py
 ```
 
 10. 結果將儲存為`cropped_video.mp4`

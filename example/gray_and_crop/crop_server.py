@@ -9,25 +9,34 @@ import time
 
 from crop_cal import crop
 
+
+# =========== configure this section ===========
 SERVER_IP = "140.113.28.158"
 PUB_PORT = 12333
 SUB_PORT = 12444
+PUB_SERVER_NAME = "pub/server/crop"
+SUB_SERVER_NAME = "sub/server/crop"
+PUB_TOPIC_INFO = {
+    "croppedVideo": "bytes"
+}
+SUB_TOPIC_INFO = {
+    "grayVideo": "bytes",
+}
+# ==============================================
 
 pub_config = {
     "node_config": {
         "server_ip": CONTROLLER_IP,
         "server_port": CONTROLLER_PORT,
-        "node_id": "pub/server/crop",
-        "node_name": "pub/server/crop",
+        "node_id": PUB_SERVER_NAME,
+        "node_name": PUB_SERVER_NAME,
         "node_domain": "domain1"
     },
     "topic_config": {
         "mode": 1,
         "ip": SERVER_IP,
         "port": PUB_PORT,
-        "topic_info": {
-            "croppedVideo": "bytes"
-        }
+        "topic_info": PUB_TOPIC_INFO
     }
 }
 
@@ -35,17 +44,15 @@ sub_config = {
     "node_config": {
         "server_ip": CONTROLLER_IP,
         "server_port": CONTROLLER_PORT,
-        "node_id": "sub/server/crop",
-        "node_name": "sub/server/crop",
+        "node_id": SUB_SERVER_NAME,
+        "node_name": SUB_SERVER_NAME,
         "node_domain": "domain1"
     },
     "topic_config": {
         "mode": 0,
         "ip": SERVER_IP,
         "port": SUB_PORT,
-        "topic_info": {
-            "grayVideo": "bytes",
-        }
+        "topic_info": SUB_TOPIC_INFO
     }
 }
 
