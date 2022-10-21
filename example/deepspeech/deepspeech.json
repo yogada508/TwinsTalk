@@ -1,0 +1,41 @@
+{
+    "client_name": "01.deepspeechClient",
+    "service": "DeepSpeech_example",
+    "input": [
+        {
+            "topic_name": "audioName",
+            "data_type": "str"
+        },
+        {
+            "topic_name": "audioData",
+            "data_type": "bytes"
+        }
+    ],
+    "output": [
+        {
+            "topic_name": "text",
+            "data_type": "str"
+        }
+    ],
+    "node":[
+        {
+            "calculator": "deepspeech",
+            "input": [
+                {
+                    "topic_name": "audioName",
+                    "data_type": "str"
+                },
+                {
+                    "topic_name": "audioData",
+                    "data_type": "bytes"
+                }
+            ],
+            "output": [
+                {
+                    "topic_name": "text",
+                    "data_type": "str"
+                }
+            ]
+        }
+    ]
+}
