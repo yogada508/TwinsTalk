@@ -1,0 +1,56 @@
+{
+    "client_name": "01.demoClient",
+    "service": "simple_demo",
+    "input": [
+        {
+            "topic_name": "imageName",
+            "data_type": "str"
+        },
+        {
+            "topic_name": "imageData",
+            "data_type": "bytes"
+        }
+    ],
+    "output": [
+        {
+            "topic_name": "resultImage",
+            "data_type": "bytes"
+        }
+    ],
+    "node":[
+        {
+            "calculator": "MIRNet",
+            "input": [
+                {
+                    "topic_name": "imageName",
+                    "data_type": "str"
+                },
+                {
+                    "topic_name": "imageData",
+                    "data_type": "bytes"
+                }
+            ],
+            "output": [
+                {
+                    "topic_name": "enhancedImage",
+                    "data_type": "bytes"
+                }
+            ]
+        },
+        {
+            "calculator": "Yolo",
+            "input": [
+                {
+                    "topic_name": "enhancedImage",
+                    "data_type": "bytes"
+                }
+            ],
+            "output": [
+                {
+                    "topic_name": "resultImage",
+                    "data_type": "bytes"
+                }
+            ]
+        }
+    ]
+}
